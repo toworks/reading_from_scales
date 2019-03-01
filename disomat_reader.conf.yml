@@ -1,0 +1,19 @@
+
+
+sql:
+    type: mssql
+    host: KRR-SQL-PACLX02 #KRR-TST-PAHWL02
+    database: KRR-PA-RAW-Rolling
+    table: stage
+
+serial:
+    comport: COM4
+    baud: 9600
+    parity: even
+    databits: 8
+    stopbits: 1
+
+app:
+    cycle: 5
+    debug: true   
+
