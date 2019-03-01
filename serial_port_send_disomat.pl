@@ -94,60 +94,14 @@ package main;
  }
 
 
-
 sub hash_bcc {
   my ($in) = shift;
-
-=comm
   my @array = split('', $in);
-  my $res = $array[1];
-  for ( my $i=2; $i <= $#array ; $i++) {
-    $res = ord($array[1]) ^ ord($array[$i]);
-    return $res;
-  }
-=cut
-
-=comm
- my $CalcCS = 0;
- my @array = split('', $in);
- for ( my $i=2; $i < $#array ; $i++) {
-    $CalcCS = ($CalcCS + ord($array[$i])) & 0xFF;
- }
- return ((($CalcCS ^ 0xFF) +1) & 0xFF);
-=cut
-
-print pack('H*', $in), "in $in", "\n";
-#my @array = split '', (pack('H*', $in));
-my @array = split('', $in);
-#my @array1;
-#push @array1, pack 'H*', $_ for @array;
-#push @array1, ord($_) for @array;
-# my $total = 0;
-# my @array = map hex, $in =~ /../g;
-print Dumper(@array);
-# print $#array, " -\n";
-#for ( my $i=2; $i < $#array1 ; $i++) {
-#   $total += ord($array1[$i]);
-#}
-# $total += ord($_) for @array1;
-# return ($total & 0xFF) ^ 0xFF;
-=comm
- my $CalcCS = 0;
- for ( my $i=0; $i < $#array ; $i++) {
-    $CalcCS = ($CalcCS + ord($array[$i])) & 0xFF;
-    #print pack('H*', $array[$i]), " |", ord(pack('H*', $array[$i])), " -\n";
- }
- return chr(17);#chr(((($CalcCS ^ 0xFF) +1) & 0xFF));
-=cut
-
-#use utf8;
-# print unpack("U*", $in);
-
-# print unpack("a1*", $in);
- my $total = $array[0];
- for ( my $i=1; $i <= $#array ; $i++) {
+#  print Dumper(@array);
+  my $total = $array[0];
+  for ( my $i=1; $i <= $#array ; $i++) {
 	$total = chr(ord($total) ^ ord($array[$i]));
-	print $total, " | $i\n";
+#	print $total, " | $i\n";
  }
  return $total;
 }
