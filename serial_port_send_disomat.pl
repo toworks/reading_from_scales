@@ -8,7 +8,6 @@ package main;
 #  binmode(STDOUT,':utf8');
 #  use open(':encoding(utf8)');
   use Win32::SerialPort;
-  use Time::HiRes qw(usleep);
   use Data::Dumper;
 
   $| = 1; #flushing output
@@ -90,7 +89,7 @@ package main;
 		print $count_in|| 0, " | | ", $string_in, "\n";
 	}
 	print "cycle\n";
-	usleep(1000*1000); #200 millisecond
+	select undef, undef, undef, 0.5; #200 millisecond
  }
 
 
