@@ -20,6 +20,8 @@ use strict;
 
 	my ($count, $readline);
 
+	$self->connect() if $self->get('error') == 1;
+		
 	#eval{ $readline = $self->{fh}->input || die "$!"; };
 	#if($@) { $self->{log}->save("e", "$@") };
 
