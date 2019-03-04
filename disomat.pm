@@ -6,33 +6,36 @@ use strict;
   use parent "serial";
   use Data::Dumper;
 
+#	протокол: SCHENCK Poll Protocol (DDP 8785)
+#	информация: bvh2141gb.pdf
+#	контроллер: DISOMAT B plus
+
   my $STX = pack "c1", 0x02;
   my $ETX = pack "c1", 0x03;
   my $DLE = pack "c1", 0x10;
+  my $REQUEST = "00#TK#";
 
   sub read {
 	my($self,) = @_;
-	#print Dumper($self);
-	$self->{STX} = pack "c1", 0x02;
-	print $self->{STX}, "\n";
-	print $STX, "\n";
+
+	my ($count, $readline);
+
+	#eval{ $readline = $self->{fh}->input || die "$!"; };
+	#if($@) { $self->{log}->save("e", "$@") };
+
+	my $message = $STX.$REQUEST.$DLE.$ETX.hash_bcc($REQUEST.$DLE.$ETX);
 	
-	my ($count_in, $string_in);
+	$self->{log}->save('d', "request: $message") if $self->{serial}->{'DEBUG'};
+	$self->{log}->save('d', "request as hex: " . unpack "H*", $message) if $self->{serial}->{'DEBUG'};
 
-	eval{ $string_in = $self->{fh}->input || die print STDERR "$!"; };
-	if(@$) { print "@$"};
+	eval{ $readline = $self->{fh}->write($message) || die "$!"; };
+	if($@) { $self->{log}->save("e", "$@") };
 
-	my $message = $STX."00#TK#".$DLE.$ETX.hash_bcc("00#TK#".$DLE.$ETX);
-	print unpack "H*", $message;
-#	$message = pack "H*", "0230302354532330230317"; #02 30 30 23 54 53 23 30 23 03 17"
-
-	print "\n send | $message\n\n";
-	$string_in = $self->{fh}->write($message) || die print STDERR "$!";
-	print $string_in, "-\n";
-	#select undef,undef,undef, 2000; #200 millisecond
-	eval{ ($count_in, $string_in) = $self->{fh}->read(100) || die print STDERR "$!"; };
-	if(@$) { print "@$"};
-	print $count_in|| 0, " | | ", $string_in, "\n";
+	$self->{log}->save('d', "request count: $readline") if $self->{serial}->{'DEBUG'};
+	eval{ $readline = $self->{fh}->read(255) || die "$!"; };
+	if($@) { $self->{log}->save("e", "$@") };
+	$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
+	return $readline;
   }
 
   sub hash_bcc {
