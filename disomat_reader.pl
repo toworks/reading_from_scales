@@ -28,23 +28,117 @@
  my $conf = configuration->new($log);
 
  my $DEBUG = $conf->get('app')->{'debug'};
+ 
+ $SIG{'TERM'} = $SIG{'HUP'} = $SIG{'INT'} = sub {
+                      local $SIG{'TERM'} = 'IGNORE';
+#						$log->save('d', "SIGNAL TERM | HUP | INT | $$");
+					  $log->save('i', "stop app");
+                      kill TERM => -$$;
+ };
 
- my $serial = disomat->new($log);
- 
- $serial->set('DEBUG' => $DEBUG);
- $serial->set('comport' => $conf->get('serial')->{comport});
- $serial->set('baud' => $conf->get('serial')->{baud});
- $serial->set('parity' => $conf->get('serial')->{parity});
- $serial->set('databits' => $conf->get('serial')->{databits});
- $serial->set('stopbits' => $conf->get('serial')->{stopbits});
+ # execute
+ threads->new(\&execute, $$, $conf, $log);
 
- print Dumper($serial);
- 
- $serial->connect();
- $serial->read();
- 
- 
- 
+ # main loop
+ {
+   $log->save('i', "start app");
+
+   while (threads->list()) {
+#        $log->save('d', "thread main");
+       sleep(1);
+       if ( ! threads->list(threads::running) ) {
+#            $daemon->remove_pid();
+           $SIG{'TERM'} = 'DEFAULT'; # Восстановить стандартный обработчик
+           kill TERM => -$$;
+		   $log->save('i', "PID $$");
+        }
+    }
+  }
+
+
+ sub execute {
+    my($id, $conf, $log) = @_;
+    $log->save('i', "start thread pid $id");
+
+
+
+	my $serial = disomat->new($log);
+	 
+	$serial->set('DEBUG' => $DEBUG);
+	$serial->set('comport' => $conf->get('serial')->{comport});
+	$serial->set('baud' => $conf->get('serial')->{baud});
+	$serial->set('parity' => $conf->get('serial')->{parity});
+	$serial->set('databits' => $conf->get('serial')->{databits});
+	$serial->set('stopbits' => $conf->get('serial')->{stopbits});
+	#$serial->connect();
+
+=comm
+	
+	# mssql create object
+	my $sql = sql->new($log);
+	$sql->set('type' => $conf->get_conf('sql')->{type});
+	$sql->set_con($conf->get_conf('sql')->{'host'}, $conf->get_conf('sql')->{'database'});
+	$sql->set('table' => $conf->get_conf('sql')->{'table'});
+	$sql->debug($DEBUG);
+=cut
+NEXT:
+	while (1) {
+#		next NEXT if ( $values eq 'error' ); 
+
+#	    $log->save('i', "thread $id");
+#		$log->save('i', "CYCLE $conf->{cycle}->{read_time}");
+#		$mssql->save(@values);
+#		splice(@values);
+#		$sql->save($values->{$type});
+	 
+		$serial->read();
+
+		my $start_timestamp = time;
+=comm
+		foreach my $data (@{$sql->get_data}) {
+			#print Dumper($data);
+			print "resp: ", $data->{response}, ' | type: ', $data->{type}, "\n" if $DEBUG;
+			my $res;
+			if ( $data->{type} eq 'start' ) {
+				# type = start -> 0 - при отправке начала сообщения
+				$res = $web->generate_url($data, 0);
+				if ( $res eq 1 ) {
+					$sql->response($data->{mid}, $res, $data->{type});
+					$log->save('i', "mid: " . $data->{mid} . "  type: " . $data->{type} . "  response: " . $res) if $DEBUG;
+				} else { 
+					$log->save('i', "mid: " . $data->{mid} . "  type: " . $data->{type} . "  response: " . $res) if $DEBUG;
+					next NEXT; # не слать 'конец' если нет 'start'
+				}
+				$res = '';
+			}
+
+			if ( $data->{type} eq 'end' ) {
+				# type = end -> 1 - при отправке конца сообщения
+				$res = $web->generate_url($data, 1);
+				if ( $res eq 1 ) {
+					$sql->response($data->{mid}, $res, $data->{type});
+					$log->save('i', "mid: " . $data->{mid} . "  type: " . $data->{type} . "  response: " . $res) if $DEBUG;
+				} else { 
+					$log->save('i', "mid: " . $data->{mid} . "  type: " . $data->{type} . "  response: " . $res) if $DEBUG;
+				}
+				$res = '';
+			}
+		}
+=cut
+		#print $web->get, "\n";
+
+        print "cycle: ",$conf->get('app')->{'cycle'}, "\n" if $DEBUG;
+        select undef, undef, undef, $conf->get('app')->{'cycle'} || 10 if time < $start_timestamp + $conf->get('app')->{'cycle'};
+		print $start_timestamp, " | ", time, "\n" if $DEBUG;
+	}
+ }
+
+
+
+
+
+
+
  
 =comm
  
