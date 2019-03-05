@@ -70,7 +70,6 @@
 	$serial->set('parity' => $conf->get('serial')->{parity});
 	$serial->set('databits' => $conf->get('serial')->{databits});
 	$serial->set('stopbits' => $conf->get('serial')->{stopbits});
-	#$serial->connect();
 
 =comm
 	
@@ -90,10 +89,25 @@ NEXT:
 #		$mssql->save(@values);
 #		splice(@values);
 #		$sql->save($values->{$type});
-	 
+		
+		my ($weight, $status);
+		
 		$serial->read();
 
+		foreach my $measure ( keys %{$conf->get('measuring')} ) {
+			if ( $measure =~ /in/ ) {
+				foreach my $type ( keys %{$conf->get('measuring')->{$measure}} ) {
+					my $bit = $conf->get('measuring')->{$measure}->{$type}->{bit} - 1;
+					if ( $type =~ /weight/ ) {
+						print "$type: ", $serial->get('measuring')->{$measure}[$bit], "\n";
+						$weight = $serial->get('measuring')->{$measure}[$bit];
+					}
+				}
+			}
+		}
+
 		my $start_timestamp = time;
+
 =comm
 		foreach my $data (@{$sql->get_data}) {
 			#print Dumper($data);

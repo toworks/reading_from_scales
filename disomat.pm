@@ -16,7 +16,7 @@ use strict;
   my $REQUEST = "00#TK#";
 
   sub read {
-	my($self,) = @_;
+	my ($self) = @_;
 
 	my ($count, $readline);
 
@@ -37,6 +37,9 @@ use strict;
 	eval{ $readline = $self->{fh}->read(255) || die "$!"; };
 	if($@) { $self->{log}->save("e", "$@") };
 	$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
+	
+	$self->measuring_in($readline);
+	
 	return $readline;
   }
 
@@ -50,6 +53,17 @@ use strict;
 #		print $total, " | $i\n";
 	}
 	return $total;
+  }
+
+  sub measuring_in {
+	my ($self, $in) = @_;
+	$in =~ s/\s//g;
+	$in =~ s/[$STX$DLE$ETX]//g;
+	$in =~ s/#\W$//g;
+	$in =~ s/^$REQUEST//g;
+	$self->{log}->save('d', "in: $in") if $self->{serial}->{'DEBUG'};
+	$self->{serial}->{measuring}->{in} = [split("#", $in)];
+	$self->{log}->save('d', "array: ".Dumper($self->{serial}->{measuring}->{in})) if $self->{serial}->{'DEBUG'};
   }
 
 }
