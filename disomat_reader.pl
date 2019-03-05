@@ -98,7 +98,7 @@
 			}
 		}
 
-		$sql->write_weight( ($id_scale, $weight, $status) );
+		$sql->write_weight( ($id_scale, $status, $weight) );
 
         print "cycle: ",$conf->get('app')->{'cycle'}, "\n" if $DEBUG;
         select undef, undef, undef, $conf->get('app')->{'cycle'} || 10;
