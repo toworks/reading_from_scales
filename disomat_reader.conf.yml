@@ -3,8 +3,8 @@
 sql:
     type: mssql
     host: KRR-SQL-PACLX02 #KRR-TST-PAHWL02
-    database: KRR-PA-RAW-Rolling
-    table: stage
+    database: KRR-PA-ISA95_PRODUCTION
+    table: KEP_Analytics_Weight
 
 serial:
     comport: COM4
@@ -13,6 +13,11 @@ serial:
     databits: 8
     stopbits: 1
 
+measuring:
+    in:
+        weight:
+                bit: 15
+    out:
 app:
     cycle: 1
     debug: true   
