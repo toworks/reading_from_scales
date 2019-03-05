@@ -2,6 +2,7 @@
 
 sql:
     type: mssql
+    driver: ODBC Driver 13 for SQL Server
     host: KRR-SQL-PACLX02 #KRR-TST-PAHWL02
     database: KRR-PA-ISA95_PRODUCTION
     table: KEP_Analytics_Weight
@@ -14,10 +15,12 @@ serial:
     stopbits: 1
 
 measuring:
+    id_scale: 1501
     in:
         weight:
                 bit: 15
     out:
+
 app:
     cycle: 1
     debug: true   
