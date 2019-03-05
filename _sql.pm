@@ -16,15 +16,30 @@ package _sql;{
 	$query = "insert into [$self->{sql}->{database}]..$self->{sql}->{table} ";
 	$query .= "(ID_Scales, Weight_OK, Weight) ";
 	$query .= "values( ?, ?, ?) ";
-	
+
+
+	$query = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE ";
+	$query .= "MERGE [$self->{sql}->{database}]..$self->{sql}->{table} AS trg ";
+    $query .= "USING (SELECT ? ID_Scales, ? Weight_OK, ? Weight) AS src ";
+    $query .= "    ON src.ID_Scales = trg.ID_Scales ";
+    $query .= "WHEN MATCHED THEN UPDATE ";
+    $query .= "    SET Weight_OK = src.Weight_OK ";
+	$query .= "    SET Weight    = src.Weight ";
+    $query .= "WHEN NOT MATCHED THEN  ";
+    $query .= "    INSERT (ID_Scales, Weight_OK, Weight)  ";
+    $query .= "    VALUES (?, ?, ?); ";
+
 	print Dumper(@values);
-=comm
-	$self->{log}->save('d', "sql get_task start") if $self->{sql}->{'DEBUG'};
+
+	$self->{log}->save('d', "query: ".$query) if $self->{sql}->{'DEBUG'};
 
     eval{ $self->{sql}->{dbh}->{RaiseError} = 1;
-          $sth = $self->{sql}->{dbh}->prepare($query) || die "$self->{sql}->{dbh}->errstr";
-#		  $sth->bind_param(1, $id || 0) || die "$self->{sql}->{dbh}->errstr";
-          $sth->execute() || die "$self->{sql}->{dbh}->errstr";
+				$self->{sql}->{dbh}->{AutoCommit} = 0;
+				$sth = $self->{sql}->{dbh}->prepare_cached($query) || die "$self->{sql}->{dbh}->errstr";
+				$sth->bind_param(1, "$id | $status") || die "$self->{sql}->{dbh}->errstr";
+				$sth->bind_param(2, $id) || die "$self->{sql}->{dbh}->errstr";
+				$sth->execute() || die "$self->{sql}->{dbh}->errstr";
+				$self->{sql}->{dbh}->{AutoCommit} = 1;
     };
     if ($@) {   $self->set('error' => 1);
                 $self->{log}->save('e', "$@");
