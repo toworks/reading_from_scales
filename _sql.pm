@@ -24,7 +24,7 @@ package _sql;{
     $query .= "    ON src.ID_Scales = trg.ID_Scales ";
     $query .= "WHEN MATCHED THEN UPDATE ";
     $query .= "    SET Weight_OK = src.Weight_OK ";
-	$query .= "    SET Weight    = src.Weight ";
+	$query .= "    	   Weight    = src.Weight ";
     $query .= "WHEN NOT MATCHED THEN  ";
     $query .= "    INSERT (ID_Scales, Weight_OK, Weight)  ";
     $query .= "    VALUES (?, ?, ?); ";
@@ -36,35 +36,22 @@ package _sql;{
     eval{ $self->{sql}->{dbh}->{RaiseError} = 1;
 				$self->{sql}->{dbh}->{AutoCommit} = 0;
 				$sth = $self->{sql}->{dbh}->prepare_cached($query) || die "$self->{sql}->{dbh}->errstr";
-				$sth->bind_param(1, "$id | $status") || die "$self->{sql}->{dbh}->errstr";
-				$sth->bind_param(2, $id) || die "$self->{sql}->{dbh}->errstr";
-				$sth->execute() || die "$self->{sql}->{dbh}->errstr";
+				#$sth->bind_param(1, "$id | $status") || die "$self->{sql}->{dbh}->errstr";
+				#$sth->bind_param(2, $id) || die "$self->{sql}->{dbh}->errstr";
+				#$sth->execute() || die "$self->{sql}->{dbh}->errstr";
+				my $id = 1;
+				foreach my $value (@values) {
+					$sth->bind_param($id, $value) || die "$DBI::errstr" if $id ne 2;
+					$sth->bind_param($id, sprintf("%.4f", "$value"), SQL_FLOAT) || die "$DBI::errstr" if $id eq 2;
+					$id++;
+				}
+				$sth->execute() || die "$DBI::errstr";
 				$self->{sql}->{dbh}->{AutoCommit} = 1;
     };
     if ($@) {   $self->set('error' => 1);
                 $self->{log}->save('e', "$@");
     };
-
-	$self->{log}->save('d', "sql get_task end") if $self->{sql}->{'DEBUG'};
-
-    unless($@) {
-        eval{
-                my $count = 0;
-                while ($ref = $sth->fetchrow_hashref()) {
-                    #print Dumper($ref), "\n";
-                    $values[$count] = $ref;
-                    $count++;
-                }
-        }
-    }
-	$self->{log}->save('d', "sql get_task while data end") if $self->{sql}->{'DEBUG'};
-    eval{ $sth->finish() || die "$self->{sql}->{dbh}->errstr"; };
-    if ($@) {   $self->set('error' => 1);
-                $self->{log}->save('e', "$@");
-				$self->{log}->save('d', "$query");
-    };
-=cut
-  }
+ }
 
  sub response {
     my($self, $id, $status) = @_;
