@@ -59,13 +59,22 @@
     my($id, $conf, $log) = @_;
     $log->save('i', "start thread pid $id");
 
-	my $serial = disomat->new($log);
-	$serial->set('DEBUG' => $DEBUG);
-	$serial->set('comport' => $conf->get('serial')->{comport});
-	$serial->set('baud' => $conf->get('serial')->{baud});
-	$serial->set('parity' => $conf->get('serial')->{parity});
-	$serial->set('databits' => $conf->get('serial')->{databits});
-	$serial->set('stopbits' => $conf->get('serial')->{stopbits});
+	my $type = $conf->get('app')->{connection};
+	
+	my $reader = disomat->new($log);
+	$reader->set('DEBUG' => $DEBUG);
+	if ( $type =~ /serial/ ) {
+		$reader->set('comport' => $conf->get('serial')->{comport});
+		$reader->set('baud' => $conf->get('serial')->{baud});
+		$reader->set('parity' => $conf->get('serial')->{parity});
+		$reader->set('databits' => $conf->get('serial')->{databits});
+		$reader->set('stopbits' => $conf->get('serial')->{stopbits});
+	} else {
+		$reader->set('host' => $conf->get($type)->{host});
+		$reader->set('port' => $conf->get($type)->{port});
+		$reader->set('protocol' => $conf->get($type)->{protocol});
+	}
+	$reader->set('connection' => $conf->get('app')->{connection});
 
 	# mssql create object
 	my $sql = _sql->new($log);
@@ -80,7 +89,7 @@
 		
 		my ($id_scale, $weight, $status);
 		
-		$serial->read();
+		$reader->read();
 
 		foreach my $measure ( keys %{$conf->get('measuring')} ) {
 			if ( $measure =~ /id_scale/ ) {
@@ -91,8 +100,8 @@
 				foreach my $type ( keys %{$conf->get('measuring')->{$measure}} ) {
 					my $bit = $conf->get('measuring')->{$measure}->{$type}->{bit} - 1;
 					if ( $type =~ /weight/ ) {
-						print "$type: ", $serial->get('measuring')->{$measure}[$bit], "\n";
-						$weight = $serial->get('measuring')->{$measure}[$bit];
+						print "$type: ", $reader->get('measuring')->{$measure}[$bit], "\n";
+						$weight = $reader->get('measuring')->{$measure}[$bit];
 					}
 				}
 			}

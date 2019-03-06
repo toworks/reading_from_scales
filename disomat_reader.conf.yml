@@ -14,6 +14,11 @@ serial:
     databits: 8
     stopbits: 1
 
+network:
+    host: 10.21.69.44
+    port: 4001
+    protocol: udp
+
 measuring:
     id_scale: 1501
     in:
@@ -23,5 +28,6 @@ measuring:
 
 app:
     cycle: 1
-    debug: true   
+    connection: network
+    debug: true
 

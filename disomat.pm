@@ -18,25 +18,31 @@ use strict;
   sub read {
 	my ($self) = @_;
 
-	my ($count, $readline);
-
-	$self->connect() if $self->get('error') == 1;
-		
-	#eval{ $readline = $self->{fh}->input || die "$!"; };
-	#if($@) { $self->{log}->save("e", "$@") };
+	$self->{log}->save('d', "type connection: $self->{serial}->{connection}") if $self->{serial}->{'DEBUG'};
 
 	my $message = $STX.$REQUEST.$DLE.$ETX.hash_bcc($REQUEST.$DLE.$ETX);
-	
+
 	$self->{log}->save('d', "request: $message") if $self->{serial}->{'DEBUG'};
 	$self->{log}->save('d', "request as hex: " . unpack "H*", $message) if $self->{serial}->{'DEBUG'};
 
-	eval{ $readline = $self->{fh}->write($message) || die "$!"; };
-	if($@) { $self->{log}->save("e", "$@") };
+	my ($count, $readline);
 
-	$self->{log}->save('d', "request count: $readline") if $self->{serial}->{'DEBUG'};
-	eval{ $readline = $self->{fh}->read(255) || die "$!"; };
-	if($@) { $self->{log}->save("e", "$@") };
-	$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
+	if ( $self->{serial}->{connection} =~ /serial/ ) {
+		$self->connect() if $self->get('error') == 1;
+			
+		#eval{ $readline = $self->{fh}->input || die "$!"; };
+		#if($@) { $self->{log}->save("e", "$@") };
+		
+		eval{ $readline = $self->{fh}->write($message) || die "$!"; };
+		if($@) { $self->{log}->save("e", "$@") };
+
+		$self->{log}->save('d', "request count: $readline") if $self->{serial}->{'DEBUG'};
+		eval{ $readline = $self->{fh}->read(255) || die "$!"; };
+		if($@) { $self->{log}->save("e", "$@") };
+		$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
+	} else {
+		$readline = $self->net_read($message);
+	}
 	
 	$self->measuring_in($readline);
 	
@@ -66,5 +72,45 @@ use strict;
 	$self->{log}->save('d', "array: ".Dumper($self->{serial}->{measuring}->{in})) if $self->{serial}->{'DEBUG'};
   }
 
+  sub net_read {
+	my ($self, $message) = @_;
+
+	use IO::Socket::INET;
+
+	$| = 1;
+
+	$self->{log}->save('d', "host: ".$self->{serial}->{host}.
+							" port: ".$self->{serial}->{port}.
+							" protocol: ".$self->{serial}->{protocol}) if $self->{serial}->{'DEBUG'};
+
+	my $socket;
+
+	eval {
+		$socket = new IO::Socket::INET (
+		PeerHost => $self->{serial}->{host},
+		PeerPort => $self->{serial}->{port},
+		Proto => $self->{serial}->{protocol},
+		) || die "$!";
+	};
+	if($@) { $self->{log}->save("e", "$@") };
+	
+	#print "connected to the server\n";
+ 
+	# data to send to a server
+	#my $req = 'hello world';
+	my $size = $socket->send($message);
+	print "sent data of length $size\n";
+	 
+	# notify server that request has been sent
+	shutdown($socket, 1);
+	 
+	# receive a response of up to 1024 characters from server
+	my $response = "";
+	$socket->recv($response, 1024);
+	print "received response: $response\n";
+	 
+	$socket->close();
+	return $response;
+  }
 }
 1;
