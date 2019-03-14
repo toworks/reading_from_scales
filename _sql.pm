@@ -16,13 +16,13 @@ package _sql;{
 
 	$query = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE ";
 	$query .= "MERGE [$self->{sql}->{database}]..$self->{sql}->{table} AS trg ";
-    $query .= "USING (SELECT ? ID_Scales, ? Weight_OK, ? Weight) AS src ";
+    $query .= "USING (SELECT ? ID_Scales, ? WeightStabilized_1, ? Weight_platform_1) AS src ";
     $query .= "    ON src.ID_Scales = trg.ID_Scales ";
     $query .= "WHEN MATCHED THEN UPDATE ";
-    $query .= "    SET Weight_OK = src.Weight_OK, ";
-	$query .= "    	   Weight    = src.Weight ";
+    $query .= "    SET WeightStabilized_1 = src.WeightStabilized_1, ";
+	$query .= "    	   Weight_platform_1  = src.Weight_platform_1 ";
     $query .= "WHEN NOT MATCHED THEN  ";
-    $query .= "    INSERT (ID_Scales, Weight_OK, Weight)  ";
+    $query .= "    INSERT (ID_Scales, WeightStabilized_1, Weight_platform_1)  ";
     $query .= "    VALUES (?, ?, ?); ";
 
 	# transfer 3 parametera in query as 6
