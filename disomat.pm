@@ -87,34 +87,40 @@ use strict;
 							" port: ".$self->{serial}->{port}.
 							" protocol: ".$self->{serial}->{protocol}) if $self->{serial}->{'DEBUG'};
 
-	my $socket;
+	my ($socket, $response);
 
 	eval {
 		$socket = new IO::Socket::INET (
-		PeerHost => $self->{serial}->{host},
-		PeerPort => $self->{serial}->{port},
-		Proto => $self->{serial}->{protocol},
+		PeerHost   => $self->{serial}->{host},
+		PeerPort   => $self->{serial}->{port},
+		Proto      => $self->{serial}->{protocol},
+		Timeout    => 5,
+#		Blocking => 0,
 		) || die "$!";
 	};
 	if($@) { $self->{log}->save("e", "$@") };
+
+	eval {
+		my $size = $socket->send($message);
+		print "sent data of length $size\n";
+	};
+	if($@) { $self->{log}->save("e", "$@") };
 	
-	#print "connected to the server\n";
- 
-	# data to send to a server
-	#my $req = 'hello world';
-	my $size = $socket->send($message);
-	print "sent data of length $size\n";
-	 
 	# notify server that request has been sent
 	shutdown($socket, 1);
-	 
-	# receive a response of up to 1024 characters from server
-	my $response = "";
-	$socket->recv($response, 1024);
-	print "received response: $response\n";
-	 
+	
+	use IO::Select;
+
+	my $select = new IO::Select();
+	$select->add($socket);
+	my @socket = $select->can_read(1);
+	if (@socket == 1) {
+		$socket->recv($response, 1024);
+		print "received response: $response\n" if $self->{serial}->{'DEBUG'};
+	}
 	$socket->close();
-	return $response;
+
+	return $response || "";
   }
 }
 1;
