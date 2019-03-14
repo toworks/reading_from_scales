@@ -15,15 +15,23 @@ serial:
     stopbits: 1
 
 network:
-    host: 10.21.69.44
+    host: 10.27.232.50
+    #10.21.69.44
     port: 4001
+    #4001
     protocol: udp
+
+scales:
+    id: 00
+    command: TG
+    coefficient: 1000
 
 measuring:
     id_scale: 1501
     in:
         weight:
-                bit: 15
+                #bit: 15
+                bit: 1
     out:
 
 app:

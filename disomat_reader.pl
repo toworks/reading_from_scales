@@ -63,6 +63,8 @@
 	
 	my $reader = disomat->new($log);
 	$reader->set('DEBUG' => $DEBUG);
+	$reader->set('scales' => $conf->get('scales')->{id});
+	$reader->set('command' => $conf->get('scales')->{command});
 	if ( $type =~ /serial/ ) {
 		$reader->set('comport' => $conf->get('serial')->{comport});
 		$reader->set('baud' => $conf->get('serial')->{baud});
@@ -100,8 +102,8 @@
 				foreach my $type ( keys %{$conf->get('measuring')->{$measure}} ) {
 					my $bit = $conf->get('measuring')->{$measure}->{$type}->{bit} - 1;
 					if ( $type =~ /weight/ ) {
-						print "$type: ", $reader->get('measuring')->{$measure}[$bit], "\n";
-						$weight = $reader->get('measuring')->{$measure}[$bit];
+						$weight = $reader->get('measuring')->{$measure}[$bit] * $conf->get('scales')->{coefficient};
+						print "$type: ", $weight, "\n";
 					}
 				}
 			}

@@ -13,11 +13,15 @@ use strict;
   my $STX = pack "c1", 0x02;
   my $ETX = pack "c1", 0x03;
   my $DLE = pack "c1", 0x10;
-  my $REQUEST = "00#TK#";
+  my $REQUEST;# = "00#TG#";
 
   sub read {
 	my ($self) = @_;
 
+	$REQUEST = $self->{serial}->{scales} . "#" .$self->{serial}->{command}. "#";
+	
+	$self->{log}->save('d', "scales id: $self->{serial}->{scales}".
+							"command: $self->{serial}->{command}") if $self->{serial}->{'DEBUG'};
 	$self->{log}->save('d', "type connection: $self->{serial}->{connection}") if $self->{serial}->{'DEBUG'};
 
 	my $message = $STX.$REQUEST.$DLE.$ETX.hash_bcc($REQUEST.$DLE.$ETX);
