@@ -102,7 +102,7 @@ use strict;
 
 	eval {
 		my $size = $socket->send($message);
-		print "sent data of length $size\n";
+		print "sent data of length $size\n" if $self->{serial}->{'DEBUG'};
 	};
 	if($@) { $self->{log}->save("e", "$@") };
 	
