@@ -95,21 +95,21 @@
 
 		foreach my $measure ( keys %{$conf->get('measuring')} ) {
 			if ( $measure =~ /id_scale/ ) {
-				print "$measure: ", $conf->get('measuring')->{$measure}, "\n";
+				print "$measure: ", $conf->get('measuring')->{$measure}, "\n" if $DEBUG;
 				$id_scale = $conf->get('measuring')->{$measure};
 			}
 			if ( $measure =~ /in/ ) {
 				foreach my $type ( keys %{$conf->get('measuring')->{$measure}} ) {
 					my $bit = $conf->get('measuring')->{$measure}->{$type}->{bit} - 1;
 					if ( $type =~ /weight/ ) {
-						$weight = $reader->get('measuring')->{$measure}[$bit] * $conf->get('scales')->{coefficient};
-						print "$type: ", $weight, "\n";
+						$weight = $reader->get('measuring')->{$measure}[$bit] * $conf->get('scales')->{coefficient} if defined($reader->get('measuring')->{$measure}[$bit]);
+						print "$type: ", $weight, "\n" if $DEBUG;
 					}
 				}
 			}
 		}
 
-		$sql->write_weight( ($id_scale, $status, $weight) );
+		$sql->write_weight( ($id_scale, ($status = 1), $weight) );
 
         print "cycle: ",$conf->get('app')->{'cycle'}, "\n" if $DEBUG;
         select undef, undef, undef, $conf->get('app')->{'cycle'} || 10;

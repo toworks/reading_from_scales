@@ -3,7 +3,8 @@
 sql:
     type: mssql
     driver: ODBC Driver 13 for SQL Server
-    host: KRR-SQL-PACLX02 #KRR-TST-PAHWL02
+    #host: KRR-SQL-PACLX02
+    host: KRR-TST-PAHWL02
     database: KRR-PA-ISA95_PRODUCTION
     table: KEP_Analytics_Weight
 
@@ -27,7 +28,7 @@ scales:
     coefficient: 1000
 
 measuring:
-    id_scale: 1501
+    id_scale: 1510
     in:
         weight:
                 #bit: 15
@@ -37,5 +38,5 @@ measuring:
 app:
     cycle: 1
     connection: network
-    debug: true
+    debug: false
 
