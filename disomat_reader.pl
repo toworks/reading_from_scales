@@ -109,7 +109,7 @@
 			}
 		}
 
-		$sql->write_weight( ($id_scale, ($status = 1), $weight) );
+		$sql->write_weight( ($id_scale, strftime("%Y-%m-%d %H:%M:%S", localtime time), ($status = 1), $weight) );
 
         print "cycle: ",$conf->get('app')->{'cycle'}, "\n" if $DEBUG;
         select undef, undef, undef, $conf->get('app')->{'cycle'} || 10;
