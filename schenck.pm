@@ -1,4 +1,4 @@
-package disomat;{ 
+package schenck;{ 
 use strict;
   use warnings;
   use utf8;
