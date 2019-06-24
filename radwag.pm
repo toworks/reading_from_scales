@@ -16,6 +16,12 @@ package radwag;{
   sub read {
 	my ($self) = @_;
 
+	if ( defined($self->{serial}->{connection}) ) {
+		$self->{connection} = $self->{serial}->{connection};
+	}
+
+	$self->{log}->save('d', "connection type: " . $self->{connection} ) if $self->{serial}->{'DEBUG'};
+
 	$REQUEST = $self->{serial}->{command} . $ETX;
 
 	$self->{log}->save('d', "command: $self->{serial}->{command}") if $self->{serial}->{'DEBUG'};
@@ -25,7 +31,7 @@ package radwag;{
 
 	my ($count, $readline);
 
-	if ( $self->{serial}->{connection} =~ /serial/ ) {
+	if ( $self->{connection} =~ /serial/ ) {
 		$self->connect() if $self->get('error') == 1;
 
 		#eval{ $readline = $self->{fh}->input || die "$!"; };
@@ -41,21 +47,32 @@ package radwag;{
 	} else {
 		$readline = $self->net_read($REQUEST);
 	}
-	
-	$self->measuring_in($readline);
-	
-	return $readline;
+
+	return $self->processing($readline);
   }
 
-  sub measuring_in {
-	my ($self, $in) = @_;
-#	$in =~ s/\s//g;
-#	$in =~ s/[$STX$DLE$ETX]//g;
-#	$in =~ s/#\W$//g;
-#	$in =~ s/^$REQUEST//g;
-	$self->{log}->save('d', "in: $in") if $self->{serial}->{'DEBUG'};
-	$self->{serial}->{measuring}->{in} = [split(" ", $in)];
-	$self->{log}->save('d', "array: ".Dumper($self->{serial}->{measuring}->{in})) if $self->{serial}->{'DEBUG'};
+  sub processing {
+	my ($self, $raw) = @_;
+	my $weight;
+	$self->{log}->save('d', "processing raw: $raw") if $self->{serial}->{'DEBUG'};
+	($self->{answer}->{command}, $self->{answer}->{weight}, $self->{answer}->{unit}) = split(" ", $raw);
+	$self->{log}->save('d', "answer:    command: '".$self->{answer}->{command}."'  ".
+							"weight: '".$self->{answer}->{weight}."'  ".
+							"unit: '".$self->{answer}->{unit}."'"
+	) if $self->{serial}->{'DEBUG'};
+
+	if ( $self->{serial}->{command} eq $self->{answer}->{command} and
+		 $self->{answer}->{weight} =~ /^[0-9,.E]+$/
+	 ) {
+		$self->{answer}->{weight} =~ s/,//g;
+		$self->{log}->save('d', "stable weight: ".$self->{answer}->{weight})if $self->{serial}->{'DEBUG'};
+		if ( $self->{answer}->{unit} eq 'k' ) {
+			$weight = $raw = $self->{answer}->{weight};
+		} elsif ( $self->{answer}->{unit} eq 'g' ) {
+			$weight = $self->{answer}->{weight} * $self->{serial}->{coefficient};
+		}
+	}
+	return $weight;
   }
 
   sub net_read {

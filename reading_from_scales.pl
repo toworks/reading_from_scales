@@ -73,18 +73,19 @@
 	$reader->set('DEBUG' => $DEBUG);
 	$reader->set('scales' => $conf->{'scales'}->{id});
 	$reader->set('command' => $conf->{'scales'}->{command});
+	$reader->set('coefficient' => $conf->{'scales'}->{coefficient});
 	if ( $connection_type =~ /serial/ ) {
-		$reader->set('comport' => $conf->{'serial'}->{comport});
-		$reader->set('baud' => $conf->{'serial'}->{baud});
-		$reader->set('parity' => $conf->{'serial'}->{parity});
-		$reader->set('databits' => $conf->{'serial'}->{databits});
-		$reader->set('stopbits' => $conf->{'serial'}->{stopbits});
+		$reader->set('comport' => $conf->{$connection_type}->{comport});
+		$reader->set('baud' => $conf->{$connection_type}->{baud});
+		$reader->set('parity' => $conf->{$connection_type}->{parity});
+		$reader->set('databits' => $conf->{$connection_type}->{databits});
+		$reader->set('stopbits' => $conf->{$connection_type}->{stopbits});
 	} else {
 		$reader->set('host' => $conf->{$connection_type}->{host});
 		$reader->set('port' => $conf->{$connection_type}->{port});
 		$reader->set('protocol' => $conf->{$connection_type}->{protocol});
 	}
-	$reader->set('connection' => $conf->{connection});
+	$reader->set('connection' => $connection_type);
 
 	# mssql create object
 	my $sql = _sql->new($log);
@@ -97,10 +98,9 @@
 
 	while (1) {
 		
-		my ($id_scale, $weight, $status);
-		
-		$reader->read();
-
+		my $status = 1;
+		my $weight = $reader->read();
+=comm
 		foreach my $measure ( keys %{$conf->{'measuring'}} ) {
 			if ( $measure =~ /id_scale/ ) {
 				print "$measure: ", $conf->{measuring}->{$measure}, "\n" if $DEBUG;
@@ -116,8 +116,14 @@
 				}
 			}
 		}
-
-#		$sql->write_weight( ($id_scale, strftime("%Y-%m-%d %H:%M:%S", localtime time), ($status = 1), $weight) );
+=cut
+		$log->save('i', $conf->{'measuring'}->{id_scale}. ", " .
+						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
+						" $status = 1, $weight" ) if defined($weight);
+		print $conf->{'measuring'}->{id_scale}. ", " .
+						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
+						" $status = 1, $weight","\n" if defined($weight);
+#		$sql->write_weight( ($conf->{'measuring'}->{id_scale}, strftime("%Y-%m-%d %H:%M:%S", localtime time), ($status = 1), $weight) ) if defined($weight);
 
         print "cycle: ",$conf->{'cycle'}, "\n" if $DEBUG;
         select undef, undef, undef, $conf->{'cycle'} || 10;
