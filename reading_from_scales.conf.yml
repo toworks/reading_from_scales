@@ -1,0 +1,80 @@
+
+scales:
+    shcenck:
+        enabled: false
+        connection: network
+        type: disomat b plus
+        cycle: 1
+        sql:
+            type: mssql
+            driver: ODBC Driver 13 for SQL Server
+            #host: KRR-SQL-PACLX02
+            host: KRR-TST-PAHWL02
+            database: KRR-PA-ISA95_PRODUCTION
+            table: KEP_Analytics_Weight
+
+        serial:
+            comport: COM4
+            baud: 9600
+            parity: even
+            databits: 8
+            stopbits: 1
+
+        network:
+            host: 10.27.232.50
+            port: 4001
+            protocol: udp
+
+        scales:
+            id: 00
+            command: TG
+            coefficient: 1000
+
+        measuring:
+            id_scale: 1510
+            in:
+                weight:
+                        bit: 1
+            out:
+
+    radwag:
+        enabled: true
+        connection: serial
+        type: app 25/c/2
+        cycle: 1
+        sql:
+            type: mssql
+            driver: ODBC Driver 13 for SQL Server
+            #host: KRR-SQL-PACLX02
+            host: KRR-TST-PAHWL02
+            database: KRR-PA-ISA95_PRODUCTION
+            table: KEP_Analytics_Weight
+
+        serial:
+            comport: COM3
+            baud: 9600
+            parity: none
+            databits: 8
+            stopbits: 1
+
+        network:
+            host: 10.27.232.50
+            port: 4001
+            protocol: udp
+
+        scales:
+            id: 00
+            command: TG
+            coefficient: 1000
+
+        measuring:
+            id_scale: 1510
+            in:
+                weight:
+                        bit: 1
+            out:
+
+app:
+    cycle: 1
+    debug: false
+
