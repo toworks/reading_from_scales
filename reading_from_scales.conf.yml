@@ -41,7 +41,7 @@ scales:
         enabled: true
         connection: serial
         type: app 25/c/2
-        cycle: 1
+        cycle: 0.5
         sql:
             type: mssql
             driver: ODBC Driver 13 for SQL Server
@@ -52,7 +52,7 @@ scales:
 
         serial:
             comport: COM3
-            baud: 9600
+            baud: 115200
             parity: none
             databits: 8
             stopbits: 1
@@ -63,8 +63,7 @@ scales:
             protocol: udp
 
         scales:
-            id: 00
-            command: TG
+            command: SUI
             coefficient: 1000
 
         measuring:
@@ -76,5 +75,5 @@ scales:
 
 app:
     cycle: 1
-    debug: false
+    debug: true
 
