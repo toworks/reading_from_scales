@@ -37,7 +37,9 @@ use strict;
 
 	if ( $self->{connection} =~ /serial/ ) {
 		$self->connect() if $self->get('error') == 1;
-			
+
+		return unless $self->get('error') == 1;
+
 		#eval{ $readline = $self->{fh}->input || die "$!"; };
 		#if($@) { $self->{log}->save("e", "$@") };
 		
@@ -119,7 +121,10 @@ use strict;
 #		Blocking => 0,
 		) || die "$!";
 	};
-	if($@) { $self->{log}->save("e", "$@") };
+	if($@) {
+		$self->{log}->save("e", "$@");
+		return;
+	};
 
 	eval {
 		my $size = $socket->send($message);
