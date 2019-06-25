@@ -71,9 +71,8 @@
 
 	my $reader = $scale_type->new($log);
 	$reader->set('DEBUG' => $DEBUG);
-	$reader->set('scales' => $conf->{'scales'}->{id});
-	$reader->set('command' => $conf->{'scales'}->{command});
-	$reader->set('coefficient' => $conf->{'scales'}->{coefficient});
+	$reader->set('scale' => $conf->{'scale'});
+	$reader->set('measuring' => $conf->{'measuring'});
 	if ( $connection_type =~ /serial/ ) {
 		$reader->set('comport' => $conf->{$connection_type}->{comport});
 		$reader->set('baud' => $conf->{$connection_type}->{baud});
@@ -100,30 +99,14 @@
 		
 		my $status = 1;
 		my $weight = $reader->read();
-=comm
-		foreach my $measure ( keys %{$conf->{'measuring'}} ) {
-			if ( $measure =~ /id_scale/ ) {
-				print "$measure: ", $conf->{measuring}->{$measure}, "\n" if $DEBUG;
-				$id_scale = $conf->{'measuring'}->{$measure};
-			}
-			if ( $measure =~ /in/ ) {
-				foreach my $type ( keys %{$conf->{'measuring'}->{$measure}} ) {
-					my $bit = $conf->{'measuring'}->{$measure}->{$type}->{bit} - 1;
-					if ( $type =~ /weight/ ) {
-						$weight = $reader->{'measuring'}->{$measure}[$bit] * $conf->{'scales'}->{coefficient} if defined($reader->{'measuring'}->{$measure}[$bit]);
-						print "$type: ", $weight, "\n" if $DEBUG;
-					}
-				}
-			}
-		}
-=cut
+
 		$log->save('i', $conf->{'measuring'}->{id_scale}. ", " .
 						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
-						" $status = 1, $weight" ) if defined($weight);
+						" $status = 1, $weight" ) if defined($weight) and $DEBUG;
 		print $conf->{'measuring'}->{id_scale}. ", " .
 						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
-						" $status = 1, $weight","\n" if defined($weight);
-#		$sql->write_weight( ($conf->{'measuring'}->{id_scale}, strftime("%Y-%m-%d %H:%M:%S", localtime time), ($status = 1), $weight) ) if defined($weight);
+						" $status = 1, $weight","\n" if defined($weight) and $DEBUG;
+#		$sql->write_weight( ($conf->{'measuring'}->{id_scale}, strftime("%Y-%m-%d %H:%M:%S", localtime time), $status, $weight) ) if defined($weight);
 
         print "cycle: ",$conf->{'cycle'}, "\n" if $DEBUG;
         select undef, undef, undef, $conf->{'cycle'} || 10;
