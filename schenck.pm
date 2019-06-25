@@ -18,10 +18,14 @@ use strict;
   sub read {
 	my ($self) = @_;
 
-	$REQUEST = $self->{serial}->{scales} . "#" .$self->{serial}->{command}. "#";
-	
-	$self->{log}->save('d', "scales id: $self->{serial}->{scales}".
-							"command: $self->{serial}->{command}") if $self->{serial}->{'DEBUG'};
+	if ( defined($self->{serial}->{connection}) ) {
+		$self->{connection} = $self->{serial}->{connection};
+	}
+
+	$REQUEST = $self->{serial}->{scale}->{id} . "#" .$self->{serial}->{scale}->{command}. "#";
+
+	$self->{log}->save('d', "scales id: $self->{serial}->{scale}->{id}".
+							"  command: $self->{serial}->{scale}->{command}") if $self->{serial}->{'DEBUG'};
 	$self->{log}->save('d', "type connection: $self->{serial}->{connection}") if $self->{serial}->{'DEBUG'};
 
 	my $message = $STX.$REQUEST.$DLE.$ETX.hash_bcc($REQUEST.$DLE.$ETX);
@@ -31,7 +35,7 @@ use strict;
 
 	my ($count, $readline);
 
-	if ( $self->{serial}->{connection} =~ /serial/ ) {
+	if ( $self->{connection} =~ /serial/ ) {
 		$self->connect() if $self->get('error') == 1;
 			
 		#eval{ $readline = $self->{fh}->input || die "$!"; };
@@ -47,10 +51,8 @@ use strict;
 	} else {
 		$readline = $self->net_read($message);
 	}
-	
-	$self->measuring_in($readline);
-	
-	return $readline;
+
+	return $self->processing($readline);
   }
 
   sub hash_bcc {
@@ -65,15 +67,34 @@ use strict;
 	return $total;
   }
 
-  sub measuring_in {
-	my ($self, $in) = @_;
-	$in =~ s/\s//g;
-	$in =~ s/[$STX$DLE$ETX]//g;
-	$in =~ s/#\W$//g;
-	$in =~ s/^$REQUEST//g;
-	$self->{log}->save('d', "in: $in") if $self->{serial}->{'DEBUG'};
-	$self->{serial}->{measuring}->{in} = [split("#", $in)];
-	$self->{log}->save('d', "array: ".Dumper($self->{serial}->{measuring}->{in})) if $self->{serial}->{'DEBUG'};
+  sub processing {
+	my ($self, $raw) = @_;
+	my @array;
+	$raw =~ s/\s//g;
+	$raw =~ s/[$STX$DLE$ETX]//g;
+	$raw =~ s/#\W$//g;
+	$raw =~ s/^$REQUEST//g;
+	$self->{log}->save('d', "processing raw: $raw") if $self->{serial}->{'DEBUG'};
+	@array = split("#", $raw);
+	$self->{log}->save('d', "array: ".Dumper(@array)) if $self->{serial}->{'DEBUG'};
+	return $self->get_weight(\@array);
+  }
+
+  sub get_weight {
+	my ($self, $raw) = @_;
+	my $weight;
+	foreach my $measure ( keys %{$self->{serial}->{'measuring'}} ) {
+		if ( $measure =~ /in/ ) {
+			foreach my $type ( keys %{$self->{serial}->{'measuring'}->{$measure}} ) {
+				my $bit = $self->{serial}->{'measuring'}->{$measure}->{$type}->{bit} - 1;
+				if ( $type =~ /weight/ ) {
+					$weight = $raw->[$bit] * $self->{serial}->{'scale'}->{coefficient} if defined($raw->[$bit]);
+					print "$type: ", $weight, "\n" if $self->{serial}->{'DEBUG'};
+				}
+			}
+		}
+	}
+	return 	$weight;
   }
 
   sub net_read {
