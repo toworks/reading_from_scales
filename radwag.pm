@@ -22,9 +22,9 @@ package radwag;{
 
 	$self->{log}->save('d', "connection type: " . $self->{connection} ) if $self->{serial}->{'DEBUG'};
 
-	$REQUEST = $self->{serial}->{command} . $ETX;
+	$REQUEST = $self->{serial}->{'scale'}->{command} . $ETX;
 
-	$self->{log}->save('d', "command: $self->{serial}->{command}") if $self->{serial}->{'DEBUG'};
+	$self->{log}->save('d', "command: $self->{serial}->{'scale'}->{command}") if $self->{serial}->{'DEBUG'};
 	$self->{log}->save('d', "type connection: $self->{serial}->{connection}") if $self->{serial}->{'DEBUG'};
 
 	$self->{log}->save('d', "request: $REQUEST") if $self->{serial}->{'DEBUG'};
@@ -55,21 +55,22 @@ package radwag;{
 	my ($self, $raw) = @_;
 	my $weight;
 	$self->{log}->save('d', "processing raw: $raw") if $self->{serial}->{'DEBUG'};
+	$raw =~ s/(\s)*(-)(\s)*/ $2/; # join numeric and minus
 	($self->{answer}->{command}, $self->{answer}->{weight}, $self->{answer}->{unit}) = split(" ", $raw);
 	$self->{log}->save('d', "answer:    command: '".$self->{answer}->{command}."'  ".
 							"weight: '".$self->{answer}->{weight}."'  ".
 							"unit: '".$self->{answer}->{unit}."'"
 	) if $self->{serial}->{'DEBUG'};
 
-	if ( $self->{serial}->{command} eq $self->{answer}->{command} and
-		 $self->{answer}->{weight} =~ /^[0-9,.E]+$/
+	if ( $self->{serial}->{'scale'}->{command} eq $self->{answer}->{command} and
+		 $self->{answer}->{weight} =~ /^[-0-9,.E]+$/
 	 ) {
 		$self->{answer}->{weight} =~ s/,//g;
-		$self->{log}->save('d', "stable weight: ".$self->{answer}->{weight})if $self->{serial}->{'DEBUG'};
+		$self->{log}->save('d', "stable weight: ".$self->{answer}->{weight}) if $self->{serial}->{'DEBUG'};
 		if ( $self->{answer}->{unit} eq 'k' ) {
 			$weight = $raw = $self->{answer}->{weight};
 		} elsif ( $self->{answer}->{unit} eq 'g' ) {
-			$weight = $self->{answer}->{weight} * $self->{serial}->{coefficient};
+			$weight = $self->{answer}->{weight} * $self->{serial}->{'scale'}->{coefficient};
 		}
 	}
 	return $weight;
