@@ -38,7 +38,7 @@ scales:
             out:
 
     radwag:
-        enabled: true
+        enabled: false
         connection: serial
         type: app 25/c/2
         cycle: 0.5
@@ -69,6 +69,37 @@ scales:
         measuring:
             id_scale: 1510
 
+    mika:
+        enabled: true
+        connection: serial
+        type: мика кв 2
+        cycle: 0.5
+        sql:
+            type: mssql
+            driver: ODBC Driver 13 for SQL Server
+            #host: KRR-SQL-PACLX02
+            host: KRR-TST-PAHWL02
+            database: KRR-PA-ISA95_PRODUCTION
+            table: KEP_Analytics_Weight
+
+        serial:
+            comport: COM1
+            baud: 9600
+            parity: even
+            databits: 8
+            stopbits: 1
+
+        network:
+            host: 10.27.232.50
+            port: 4001
+            protocol: udp
+
+        scale:
+            command: VES
+            coefficient: 1000
+
+        measuring:
+            id_scale: 1610
 
 app:
     cycle: 1
