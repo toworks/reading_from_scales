@@ -6,5 +6,5 @@
 
 2. весовые контроллеры **RADWAG** 
     * протокол: ASCII
-    * информация: R-Series-User-Manual-EN.pdf
-    * контроллер: RADWAR APP 25/C/2
+    * информация: **R-Series-User-Manual-EN.pdf**
+    * контроллер: **RADWAR APP 25/C/2**
