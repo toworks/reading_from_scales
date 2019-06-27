@@ -10,7 +10,7 @@ package mika;{
 #	информация: none
 #	контроллер: МИКА КВ 2
 
-  my $ETX = ".";
+  my $ETX = "\r";
   my $REQUEST;
 
   sub read {
