@@ -9,15 +9,17 @@ sql:
     table: KEP_Analytics_Weight
 
 serial:
-    comport: COM4
+    comport: COM2
     baud: 9600
-    parity: even
+#    parity: even
+    parity: none
     databits: 8
     stopbits: 1
 
 network:
-    host: 10.27.232.50
-    #10.21.69.44
+    host: 10.27.233.134
+#    host: 10.27.226.89
+#    host: 10.27.232.50
     port: 4001
     #4001
     protocol: udp
@@ -28,7 +30,7 @@ scales:
     coefficient: 1000
 
 measuring:
-    id_scale: 1510
+    id_scale: 5555
     in:
         weight:
                 #bit: 15
@@ -38,5 +40,5 @@ measuring:
 app:
     cycle: 1
     connection: network
-    debug: false
+    debug: true
 
