@@ -34,7 +34,7 @@ package mika;{
 	if ( $self->{connection} =~ /serial/ ) {
 		$self->connect() if $self->get('error') == 1;
 		
-		return unless $self->get('error') == 1;
+		return if $self->get('error') == 1;
 
 		#eval{ $readline = $self->{fh}->input || die "$!"; };
 		#if($@) { $self->{log}->save("e", "$@") };
