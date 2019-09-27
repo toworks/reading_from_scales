@@ -108,6 +108,7 @@
 						" $status = 1, weight: ". join(" | ", @{$weight}) )  if defined($weight) and (ref $weight eq 'ARRAY') and $DEBUG;
 		print $conf->{'measuring'}->{id_scale}. ", " .
 						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
+
 						" $status = 1, $weight","\n" if defined($weight) and (ref $weight ne 'ARRAY') and $DEBUG;
 		print $conf->{'measuring'}->{id_scale}. ", " .
 						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
