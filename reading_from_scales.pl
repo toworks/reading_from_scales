@@ -113,8 +113,7 @@
 						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
 						" $status = 1, weight: ", join(" | ", @{$weight}), "\n" if defined($weight) and (ref $weight eq 'ARRAY') and $DEBUG;
 
-		#$sql->write_weight( ($conf->{'measuring'}->{id_scale}, strftime("%Y-%m-%d %H:%M:%S", localtime time), $status, $weight) ) if defined($weight);
-		$sql->write_weight( ($conf->{'measuring'}->{id_scale}, strftime("%Y-%m-%d %H:%M:%S", localtime time), $status, "5434") ) if defined($weight);
+		$sql->write_weight( ($conf->{'measuring'}->{id_scale}, strftime("%Y-%m-%d %H:%M:%S", localtime time), $status, $weight) ) if defined($weight);
 
         print "cycle: ",$conf->{'cycle'}, "\n" if $DEBUG;
         select undef, undef, undef, $conf->{'cycle'} || 10;
