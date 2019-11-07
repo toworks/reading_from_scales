@@ -1,7 +1,6 @@
-
 scales:
     schenck:
-        enabled: false
+        enabled: екгу
         connection: network
         type: disomat b plus
         cycle: 1
@@ -137,7 +136,7 @@ scales:
         enabled: network
         connection: serial
         type: Blanciai D400
-        cycle: 0.5
+        cycle: 1
         sql:
             type: mssql
             driver: ODBC Driver 13 for SQL Server
@@ -163,9 +162,9 @@ scales:
             coefficient: 1000
 
         measuring:
-            id_scale: 6065
+            id_scale: 5353
 
 app:
     cycle: 1
-    debug: true
+    debug: false
 
