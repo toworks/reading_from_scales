@@ -64,17 +64,15 @@ package blanciai;{
 							"unit: '".$self->{answer}->{unit}."'"
 	) if $self->{serial}->{'DEBUG'};
 
-	if ( $self->{serial}->{'scale'}->{command} eq $self->{answer}->{command} and
-		 $self->{answer}->{weight} =~ /^[-0-9,.E]+$/
-	 ) {
-		$self->{answer}->{weight} =~ s/,//g;
-		$self->{log}->save('d', "stable weight: ".$self->{answer}->{weight}) if $self->{serial}->{'DEBUG'};
-		if ( $self->{answer}->{unit} =~ /kg/ ) {
-			$weight = $raw = $self->{answer}->{weight};
-		} elsif ( $self->{answer}->{unit} =~ /g/ ) {
-			$weight = $self->{answer}->{weight} * $self->{serial}->{'scale'}->{coefficient};
-		}
+
+	$self->{answer}->{weight} =~ s/,//g;
+	$self->{log}->save('d', "stable weight: ".$self->{answer}->{weight}) if $self->{serial}->{'DEBUG'};
+	if ( $self->{answer}->{unit} =~ /kg/ ) {
+		$weight = $self->{answer}->{weight};
+	} elsif ( $self->{answer}->{unit} =~ /g/ ) {
+		$weight = $self->{answer}->{weight} * $self->{serial}->{'scale'}->{coefficient};
 	}
+
 	return $weight;
   }
 
