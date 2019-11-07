@@ -134,8 +134,8 @@ scales:
             id_scale: 6065
 
     blanciai:
-        enabled: true
-        connection: network
+        enabled: network
+        connection: serial
         type: Blanciai D400
         cycle: 0.5
         sql:
@@ -156,10 +156,10 @@ scales:
         network:
             host: 10.21.125.67
             port: 4001
-            protocol: tcp
+            protocol: udp
 
         scale:
-            command: PA
+            command: XB
             coefficient: 1000
 
         measuring:

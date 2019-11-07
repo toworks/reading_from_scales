@@ -57,9 +57,7 @@ package blanciai;{
 	my ($self, $raw) = @_;
 	my $weight;
 	$self->{log}->save('d', "processing raw: $raw") if $self->{serial}->{'DEBUG'};
-	$raw =~ s/(\s).*//; # join numeric and minus
-	return if $raw eq '';
-#	$raw =~ s/(\s)*(-)(\s)*/ $2/; # join numeric and minus
+	return if $raw !~ /(\s).*/;
 	($self->{answer}->{weight}, $self->{answer}->{unit}, $self->{answer}->{command}) = split(" ", $raw);
 	$self->{log}->save('d', "answer:    command: '".$self->{answer}->{command}."'  ".
 							"weight: '".$self->{answer}->{weight}."'  ".
@@ -71,9 +69,9 @@ package blanciai;{
 	 ) {
 		$self->{answer}->{weight} =~ s/,//g;
 		$self->{log}->save('d', "stable weight: ".$self->{answer}->{weight}) if $self->{serial}->{'DEBUG'};
-		if ( $self->{answer}->{unit} eq 'k' ) {
+		if ( $self->{answer}->{unit} =~ /kg/ ) {
 			$weight = $raw = $self->{answer}->{weight};
-		} elsif ( $self->{answer}->{unit} eq 'g' ) {
+		} elsif ( $self->{answer}->{unit} =~ /g/ ) {
 			$weight = $self->{answer}->{weight} * $self->{serial}->{'scale'}->{coefficient};
 		}
 	}
