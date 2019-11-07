@@ -1,6 +1,6 @@
 scales:
     schenck:
-        enabled: екгу
+        enabled: true
         connection: network
         type: disomat b plus
         cycle: 1
