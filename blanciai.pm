@@ -22,35 +22,43 @@ package blanciai;{
 
 	$self->{log}->save('d', "connection type: " . $self->{connection} ) if $self->{serial}->{'DEBUG'};
 
-	$REQUEST = $self->{serial}->{'scale'}->{command} . $ETX;
-
-	$self->{log}->save('d', "command: $self->{serial}->{'scale'}->{command}") if $self->{serial}->{'DEBUG'};
-	$self->{log}->save('d', "type connection: $self->{serial}->{connection}") if $self->{serial}->{'DEBUG'};
-
-	$self->{log}->save('d', "request: $REQUEST") if $self->{serial}->{'DEBUG'};
-
-	my ($count, $readline);
-
-	if ( $self->{connection} =~ /serial/ ) {
-		$self->connect() if $self->get('error') == 1;
+	my @weights;
+	my %scales = %{$self->{serial}->{'scale'}->{'alias'}};
+	foreach my $scale (sort {$scales{$a} <=> $scales{$b}} keys %scales ) {
+		print "key: ", $scale, , "   val: ", $scales{$scale}, "\n";
 		
-		return if $self->get('error') == 1;
+		$REQUEST = $self->{serial}->{'scale'}->{command} . $scales{$scale} . $ETX;
 
-		#eval{ $readline = $self->{fh}->input || die "$!"; };
-		#if($@) { $self->{log}->save("e", "$@") };
+		$self->{log}->save('d', "command: $self->{serial}->{'scale'}->{command}") if $self->{serial}->{'DEBUG'};
+		$self->{log}->save('d', "type connection: $self->{serial}->{connection}") if $self->{serial}->{'DEBUG'};
 
-		eval{ $readline = $self->{fh}->write($REQUEST) || die "$!"; };
-		if($@) { $self->{log}->save("e", "$@") };
+		$self->{log}->save('d', "request: $REQUEST") if $self->{serial}->{'DEBUG'};
 
-		$self->{log}->save('d', "request count: $readline") if $self->{serial}->{'DEBUG'};
-		eval{ $readline = $self->{fh}->read(255) || die "$!"; };
-		if($@) { $self->{log}->save("e", "$@") };
-		$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
-	} else {
-		$readline = $self->net_read($REQUEST);
+		my ($count, $readline);
+		
+		if ( $self->{connection} =~ /serial/ ) {
+			$self->connect() if $self->get('error') == 1;
+			
+			return if $self->get('error') == 1;
+
+			#eval{ $readline = $self->{fh}->input || die "$!"; };
+			#if($@) { $self->{log}->save("e", "$@") };
+
+			eval{ $readline = $self->{fh}->write($REQUEST) || die "$!"; };
+			if($@) { $self->{log}->save("e", "$@") };
+
+			$self->{log}->save('d', "request count: $readline") if $self->{serial}->{'DEBUG'};
+			eval{ $readline = $self->{fh}->read(255) || die "$!"; };
+			if($@) { $self->{log}->save("e", "$@") };
+			$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
+		} else {
+			$readline = $self->net_read($REQUEST);
+		}
+		$weights[$scales{$scale}] = $self->processing($readline);
 	}
-
-	return $self->processing($readline);
+	splice @weights, 0, 1;
+	print Dumper(@weights);
+	return \@weights;
   }
 
   sub processing {
@@ -71,6 +79,9 @@ package blanciai;{
 		$weight = $self->{answer}->{weight};
 	} elsif ( $self->{answer}->{unit} =~ /g/ ) {
 		$weight = $self->{answer}->{weight} * $self->{serial}->{'scale'}->{coefficient};
+	} elsif ( $self->{answer}->{unit} =~ /\A\z/ ) {
+#		$weight = $self->{answer}->{weight} / $self->{serial}->{'scale'}->{coefficient};
+		$weight = $self->{answer}->{weight};
 	}
 
 	return $weight;
