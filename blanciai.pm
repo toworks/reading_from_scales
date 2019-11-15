@@ -25,7 +25,6 @@ package blanciai;{
 	my @weights;
 	my %scales = %{$self->{serial}->{'scale'}->{'alias'}};
 	foreach my $scale (sort {$scales{$a} <=> $scales{$b}} keys %scales ) {
-		print "key: ", $scale, , "   val: ", $scales{$scale}, "\n";
 		
 		$REQUEST = $self->{serial}->{'scale'}->{command} . $scales{$scale} . $ETX;
 
