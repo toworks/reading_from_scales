@@ -56,8 +56,9 @@ package blanciai;{
 		}
 		$weights[$scales{$scale}] = $self->processing($readline);
 	}
+	# remove 0 array variable
 	splice @weights, 0, 1;
-	print Dumper(@weights);
+	$self->{log}->save('d', Dumper(@weights) ) if $self->{serial}->{'DEBUG'};
 	return \@weights;
   }
 
