@@ -12,6 +12,9 @@ package blanciai;{
 
   my $ETX = "\r";
   my $REQUEST;
+  my $ANSWER;
+  my @POINT_ZERO;
+
 
   sub read {
 	my ($self) = @_;
@@ -20,45 +23,76 @@ package blanciai;{
 		$self->{connection} = $self->{serial}->{connection};
 	}
 
-	$self->{log}->save('d', "connection type: " . $self->{connection} ) if $self->{serial}->{'DEBUG'};
+	my (@weights, $command, $scales);
+	
+	$command = \%{$self->{serial}->{'scale'}->{'command'}};
+	$scales = \%{$self->{serial}->{'scale'}->{'alias'}};
 
-	my @weights;
-	my %scales = %{$self->{serial}->{'scale'}->{'alias'}};
-	foreach my $scale (sort {$scales{$a} <=> $scales{$b}} keys %scales ) {
+	print Dumper($command);
+	
+	$ANSWER = $self->_read($command->{'status'});
+	my $zero = $self->get_status($ANSWER, 'zero');
+	my $stab = $self->get_status($ANSWER, 'stab');
+
+	foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 		
-		$REQUEST = $self->{serial}->{'scale'}->{command} . $scales{$scale} . $ETX;
+		$ANSWER = $self->_read($command->{'cell'} . $scales->{$scale});
 
-		$self->{log}->save('d', "command: $self->{serial}->{'scale'}->{command}") if $self->{serial}->{'DEBUG'};
-		$self->{log}->save('d', "type connection: $self->{serial}->{connection}") if $self->{serial}->{'DEBUG'};
-
-		$self->{log}->save('d', "request: $REQUEST") if $self->{serial}->{'DEBUG'};
-
-		my ($count, $readline);
-		
-		if ( $self->{connection} =~ /serial/ ) {
-			$self->connect() if $self->get('error') == 1;
-			
-			return if $self->get('error') == 1;
-
-			#eval{ $readline = $self->{fh}->input || die "$!"; };
-			#if($@) { $self->{log}->save("e", "$@") };
-
-			eval{ $readline = $self->{fh}->write($REQUEST) || die "$!"; };
-			if($@) { $self->{log}->save("e", "$@") };
-
-			$self->{log}->save('d', "request count: $readline") if $self->{serial}->{'DEBUG'};
-			eval{ $readline = $self->{fh}->read(255) || die "$!"; };
-			if($@) { $self->{log}->save("e", "$@") };
-			$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
-		} else {
-			$readline = $self->net_read($REQUEST);
-		}
-		$weights[$scales{$scale}] = $self->processing($readline);
+		$weights[$scales->{$scale}] = $self->processing($ANSWER);
 	}
 	# remove 0 array variable
 	splice @weights, 0, 1;
 	$self->{log}->save('d', Dumper(@weights) ) if $self->{serial}->{'DEBUG'};
+	
+	@POINT_ZERO = @weights if ($zero == 1);
+
+	if ($stab == 1) {
+		foreach my $i (0 .. $#weights) {
+			$weights[$i] = $weights[$i] - $POINT_ZERO[$i];
+			$self->{log}->save('d', "zero point: ". $POINT_ZERO[$i]. "\tweight: ".$weights[$i]) if $self->{serial}->{'DEBUG'};
+		}
+	}
+
 	return \@weights;
+  }
+
+  sub _read {
+	my ($self, $command) = @_;
+
+	if ( defined($self->{serial}->{connection}) ) {
+		$self->{connection} = $self->{serial}->{connection};
+	}
+
+	$self->{log}->save('d', "connection type: " . $self->{connection} ) if $self->{serial}->{'DEBUG'};
+	$self->{log}->save('d', "command: $command") if $self->{serial}->{'DEBUG'};
+	$self->{log}->save('d', "type connection: $self->{serial}->{connection}") if $self->{serial}->{'DEBUG'};
+
+	$REQUEST = $command . $ETX;
+
+	$self->{log}->save('d', "request: $REQUEST") if $self->{serial}->{'DEBUG'};
+
+	my ($count, $readline);
+		
+	if ( $self->{connection} =~ /serial/ ) {
+		$self->connect() if $self->get('error') == 1;
+			
+		return if $self->get('error') == 1;
+
+		#eval{ $readline = $self->{fh}->input || die "$!"; };
+		#if($@) { $self->{log}->save("e", "$@") };
+
+		eval{ $readline = $self->{fh}->write($REQUEST) || die "$!"; };
+		if($@) { $self->{log}->save("e", "$@") };
+
+		$self->{log}->save('d', "request count: $readline") if $self->{serial}->{'DEBUG'};
+		eval{ $readline = $self->{fh}->read(255) || die "$!"; };
+		if($@) { $self->{log}->save("e", "$@") };
+		$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
+	} else {
+		$readline = $self->net_read($REQUEST);
+	}
+
+	return $readline;
   }
 
   sub processing {
@@ -85,6 +119,13 @@ package blanciai;{
 	}
 
 	return $weight;
+  }
+
+  sub get_status {
+	my ($self, $type, $data) = @_;
+	my @bin = split //, sprintf("%b", hex($data));
+	return $bin[3] if $type eq 'zero';
+	return $bin[5] if $type eq 'stab';
   }
 
   sub net_read {

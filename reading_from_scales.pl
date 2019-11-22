@@ -41,7 +41,7 @@
 	{
 		eval "use $scale";
 		$log->save('e', $@) if ($@);
-		
+
 		# execute
 		threads->new(\&execute, $$, $conf->get('scales')->{$scale}, $log, $scale);
 	}

@@ -1,6 +1,6 @@
 scales:
     schenck:
-        enabled: true
+        enabled: false
         connection: network
         type: disomat b plus
         cycle: 1
@@ -133,7 +133,7 @@ scales:
             id_scale: 6065
 
     blanciai:
-        enabled: network
+        enabled: false
         connection: serial
         type: Blanciai D400
         cycle: 1
@@ -158,7 +158,7 @@ scales:
             protocol: udp
 
         scale:
-            command: DP
+            command: {status: XZ, netto: YP, cell: DP}
             # {8: 1} 8 - датчик 1 - поле в базе (load_sensor_1)
             alias: {8: 1, 7: 2, 6: 3, 4: 4, 5: 5, 3: 6, 2: 7, 1: 8}
             coefficient: 1000
