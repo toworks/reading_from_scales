@@ -58,7 +58,12 @@ package mika;{
 	my $weight;
 	$self->{log}->save('d', "processing raw: $raw") if $self->{serial}->{'DEBUG'};
 	$raw =~ s/(\s)*(-)(\s)*/ $2/; # join numeric and minus
-	($self->{answer}->{command}, $self->{answer}->{weight}, $self->{answer}->{unit}) = split(" ", $raw);
+	if ($raw =~ /[k\|g]/) {
+		($self->{answer}->{command}, $self->{answer}->{weight}, $self->{answer}->{unit}) = split(" ", $raw);
+	} else {
+		$raw =~ s/\s*//g;
+		$self->{answer}->{weight} = $raw;
+	}
 	$self->{log}->save('d', "answer:    command: '".$self->{answer}->{command}."'  ".
 							"weight: '".$self->{answer}->{weight}."'  ".
 							"unit: '".$self->{answer}->{unit}."'"
@@ -73,6 +78,8 @@ package mika;{
 			$weight = $raw = $self->{answer}->{weight};
 		} elsif ( $self->{answer}->{unit} eq 'g' ) {
 			$weight = $self->{answer}->{weight} * $self->{serial}->{'scale'}->{coefficient};
+		} elsif ( ! defined($self->{answer}->{unit}) ) {
+			$weight = $self->{answer}->{weight};
 		}
 	}
 	return $weight;
