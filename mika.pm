@@ -78,10 +78,12 @@ package mika;{
 			$weight = $raw = $self->{answer}->{weight};
 		} elsif ( $self->{answer}->{unit} eq 'g' ) {
 			$weight = $self->{answer}->{weight} * $self->{serial}->{'scale'}->{coefficient};
-		} elsif ( ! defined($self->{answer}->{unit}) ) {
-			$weight = $self->{answer}->{weight};
 		}
 	}
+	if ( ! defined($self->{answer}->{command}) and ! defined($self->{answer}->{unit}) ) {
+		$weight = $self->{answer}->{weight};
+	}
+
 	return $weight;
   }
 
