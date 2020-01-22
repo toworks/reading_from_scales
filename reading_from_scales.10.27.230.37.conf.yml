@@ -1,0 +1,38 @@
+
+scales:
+    koda:
+        enabled: true
+        connection: serial
+        type: КОДА-IV
+        cycle: 0.5
+        sql:
+            type: mssql
+            driver: ODBC Driver 13 for SQL Server
+            host: KRR-SQL-PACLX02
+            #host: KRR-TST-PAHWL02
+            database: KRR-PA-ISA95_PRODUCTION
+            table: KEP_Analytics_Weight
+
+        serial:
+            comport: COM2
+            baud: 19200
+            parity: odd
+            databits: 8
+            stopbits: 1
+
+        network:
+            host: 10.27.230.37
+            port: 4001
+            protocol: udp
+
+        scale:
+            command: 
+            coefficient: 1000
+
+        measuring:
+            id_scale: 6065
+
+app:
+    cycle: 1
+    debug: false
+

@@ -1,0 +1,40 @@
+
+scales:
+    blanciai:
+        enabled: false
+        connection: serial
+        type: Blanciai D400
+        cycle: 1
+        sql:
+            type: mssql
+            driver: ODBC Driver 13 for SQL Server
+            host: KRR-SQL-PACLX02
+            #host: KRR-TST-PAHWL02
+            database: KRR-PA-ISA95_PRODUCTION
+            table: KEP_Analytics_Weight
+
+        serial:
+            comport: COM4
+            baud: 9600
+            parity: none
+            databits: 8
+            stopbits: 1
+
+        network:
+            host: 10.21.125.67
+            port: 4001
+            protocol: udp
+
+        scale:
+            command: {status: XZ, netto: YP, cell: DP}
+            # {8: 1} 8 - датчик 1 - поле в базе (load_sensor_1)
+            alias: {8: 1, 7: 2, 6: 3, 4: 4, 5: 5, 3: 6, 2: 7, 1: 8}
+            coefficient: 1000
+
+        measuring:
+            id_scale: 5353
+
+app:
+    cycle: 1
+    debug: false
+

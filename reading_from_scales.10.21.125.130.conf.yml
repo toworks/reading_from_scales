@@ -1,0 +1,38 @@
+
+scales:
+    mika:
+        enabled: true
+        connection: network
+        type: мика кв 2
+        cycle: 0.5
+        sql:
+            type: mssql
+            driver: ODBC Driver 13 for SQL Server
+            host: KRR-SQL-PACLX02
+            #host: KRR-TST-PAHWL02
+            database: KRR-PA-ISA95_PRODUCTION
+            table: KEP_Analytics_Weight
+
+        serial:
+            comport: COM3
+            baud: 9600
+            parity: none
+            databits: 8
+            stopbits: 1
+
+        network:
+            host: 10.21.125.130
+            port: 4001
+            protocol: udp
+
+        scale:
+            command: VES
+            coefficient: 1000
+
+        measuring:
+            id_scale: 7723
+
+app:
+    cycle: 1
+    debug: false
+
