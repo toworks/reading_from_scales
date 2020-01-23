@@ -1,7 +1,7 @@
 
 scales:
     blanciai:
-        enabled: false
+        enabled: true
         connection: serial
         type: Blanciai D400
         cycle: 1
@@ -15,7 +15,7 @@ scales:
 
         serial:
             comport: COM4
-            baud: 9600
+            baud: 19200
             parity: none
             databits: 8
             stopbits: 1
@@ -36,5 +36,5 @@ scales:
 
 app:
     cycle: 1
-    debug: false
+    debug: true
 
