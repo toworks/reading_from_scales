@@ -23,8 +23,6 @@ package blanciai;{
 		$self->{connection} = $self->{serial}->{connection};
 	}
 
-	$self->{oooo} = 10;
-
 	my (@weights, $command, $scales);
 	
 	$command = \%{$self->{serial}->{'scale'}->{'command'}};
@@ -33,21 +31,22 @@ package blanciai;{
 	print Dumper($command);
 
 	$ANSWER = $self->_read($command->{'status'});
-	my $zero = $self->get_status('zero', $ANSWER);
-	my $stab = $self->get_status('stab', $ANSWER);
+	my $zero = $self->get_status('zero', &clean($ANSWER));
+	my $stab = $self->get_status('stab', &clean($ANSWER));
 
 	foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+		$self->{answer}->{weight} =~ s/,//g;
 		my $_command = $command->{'coefficient_angle'} . $scales->{$scale};
 		$ANSWER = $self->_read($_command);
-		$calc_params{$scales->{$scale}}->{$_command} = $ANSWER;
-		
+		$calc_params{$scales->{$scale}}->{$_command} = &clean($ANSWER);
+
 		$_command = $command->{'cell'} . $scales->{$scale};
 		$ANSWER = $self->_read($_command);
-		$calc_params{$scales->{$scale}}->{$_command} = $ANSWER;
+		$calc_params{$scales->{$scale}}->{$_command} = &clean($ANSWER);
 
 		if ($zero == 1) {
 			# pi = di*ki;
-			$calc_params{$scales->{$scale}}->{'pi0'} = 
+			$calc_params{$scales->{$scale}}->{'pi0'} =
 						$calc_params{$scales->{$scale}}->{$command->{'cell'} . $scales->{$scale}} *
 						$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'} . $scales->{$scale}};
 			# При WghtT = 0 :  zi = pi;
@@ -63,31 +62,31 @@ package blanciai;{
 		# WghtT -> YP
 		my $_command = $command->{'netto'};
 		$ANSWER = $self->_read($_command);
-		$calc_params{$_command} = $ANSWER;
+		$calc_params{$_command} = &clean($ANSWER);
 	}
 
 	foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 		if ($zero != 1 and $stab == 1) {
 			# Ps = pi+pi+pi+pi+pi+pi+pi+pi;
 			$calc_params{'Ps'} += $calc_params{$scales->{$scale}}->{'pi'};
+
 			# ki = Ps/pi;
-			$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{$scales->{$scale}}->{'Ps'} /
+			$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{'Ps'} /
 													  $calc_params{$scales->{$scale}}->{'pi'};
 			# wi = WghtT/ki
-			$calc_params{$scales->{$scale}}->{'wi'} = $calc_params{$scales->{$scale}}->{'YP'} /
+			$calc_params{$scales->{$scale}}->{'wi'} = $calc_params{'YP'} /
 													  $calc_params{$scales->{$scale}}->{'ki'};
 			# wi write to array for sql
-			$weights[$scales->{$scale}] = $calc_params{$scales->{$scale}}->{'wi'};
+			$weights[$scales->{$scale}] = int($calc_params{$scales->{$scale}}->{'wi'}) if defined $calc_params{$scales->{$scale}}->{'wi'};
 		}
 	}
-	
-	print "SELF: ---", $self->{oooo}, "----\n";
 	
 	print Dumper(\%calc_params);
 	$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
 	
 	# remove 0 array variable
-	splice @weights, 0, 1;
+	splice @weights, 0, 1 if $zero != 1;
+	undef @weights if $zero == 1;
 	$self->{log}->save('d', Dumper(@weights) ) if $self->{serial}->{'DEBUG'};
 
 	return \@weights;
@@ -158,10 +157,15 @@ package blanciai;{
 	return $weight;
   }
 
+  sub clean {
+	my ($raw) = @_;
+	$raw =~ s/[^[:print:]]+//g;
+	return $raw;
+  }
+
   sub get_status {
 	my ($self, $type, $data) = @_;
-	#my @bin = split //, sprintf("%b", hex($data));
-	my @bin = split //, sprintf("%b", $data);
+	my @bin = split //, sprintf("%b", hex($data));
 	$self->{log}->save('d', "binary: ". join("|", @bin)) if $self->{serial}->{'DEBUG'};
 	return $bin[3] if $type eq 'zero';
 	return $bin[5] if $type eq 'stab';
