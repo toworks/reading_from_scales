@@ -23,8 +23,8 @@ package blanciai;{
 		$self->{connection} = $self->{serial}->{connection};
 	}
 
-	my (@weights, $command, $scales);
-	
+	my (@weights, $command, $scales, $weight_platform1, $weight_platform2);
+
 	$command = \%{$self->{serial}->{'scale'}->{'command'}};
 	$scales = \%{$self->{serial}->{'scale'}->{'alias'}};
 
@@ -91,8 +91,13 @@ package blanciai;{
 			# wi = WghtT/ki
 			$calc_params{$scales->{$scale}}->{'wi'} = $calc_params{'YP'} /
 													  $calc_params{$scales->{$scale}}->{'ki'};
-			# wi write to array for sql
-			$weights[$scales->{$scale}] = sprintf("%.0f", $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} ) if defined $calc_params{$scales->{$scale}}->{'wi'};
+			if ( defined $calc_params{$scales->{$scale}}->{'wi'} ) {
+				# wi write to array for sql
+				$weights[$scales->{$scale}] = sprintf("%.0f", $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} );
+				# weight platforms
+				$weight_platform1 += $weights[$scales->{$scale}] if ( $scales->{$scale} <= 4 );
+				$weight_platform2 += $weights[$scales->{$scale}] if ( $scales->{$scale} > 4 and $scales->{$scale} <= 8 );
+			}
 		}
 	}
 	
@@ -103,9 +108,10 @@ package blanciai;{
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			$weights[$scales->{$scale}] = 0;
 		}
+		#push @weights, sprintf("%.0f", (62.65 + 97.546 + 130 + 196) * $self->{serial}->{'scale'}->{coefficient}), (2 + (-8) + (-240) + (-154)) * $self->{serial}->{'scale'}->{coefficient};
 		push @weights, 0, 0;
 	} else {
-		push @weights, sprintf("%.0f", $calc_params{$command->{'netto'}} * $self->{serial}->{'scale'}->{coefficient} );
+		push @weights, $weight_platform1, $weight_platform2;
 	}
 
 	# remove 0 array variable
