@@ -68,7 +68,9 @@ package blanciai;{
 		$calc_params{$_command} = &clean($ANSWER);
 	}
 
-	if ( $zero != 1 and $stab == 1 and ! defined($calc_params{'Ps'}) and defined($calc_params{1}->{'pi0'}) ) {
+	if ( $zero != 1 and defined($calc_params{1}->{'pi0'}) ) {
+#	if ( $zero != 1 and ! defined($calc_params{'Ps'}) and defined($calc_params{1}->{'pi0'}) ) {
+#	if ( $zero != 1 and $stab == 1 and ! defined($calc_params{'Ps'}) and defined($calc_params{1}->{'pi0'}) ) {
 #	if ( $zero != 1 and $stab == 1 and ! defined($calc_params{'Ps'}) ) {
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			# Ps = pi+pi+pi+pi+pi+pi+pi+pi;
@@ -76,7 +78,8 @@ package blanciai;{
 		}
 	}
 
-	if ( $zero != 1 and $stab == 1 and defined($calc_params{'Ps'}) ){
+	if (defined($calc_params{'Ps'}) ){
+#	if ( $zero != 1 and $stab == 1 and defined($calc_params{'Ps'}) ){
 #	if ( $zero != 1 and $stab == 1 ){	
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			# ki = Ps/pi;
@@ -93,8 +96,15 @@ package blanciai;{
 	print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
 	$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
 	
+	if ( ! defined($calc_params{'Ps'}) ) {
+		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+			$weights[$scales->{$scale}] = 0;
+		}
+	}
+
 	# remove 0 array variable
-	splice @weights, 0, 1 if $zero != 1;
+	splice @weights, 0, 1;# if $zero != 1;
+
 	$self->{log}->save('d', Dumper(@weights) ) if $self->{serial}->{'DEBUG'};
 	
 	if ( @weights ) {
@@ -172,6 +182,7 @@ package blanciai;{
   sub clean {
 	my ($raw) = @_;
 	$raw =~ s/[^[:print:]]+//g;
+	$raw =~ s/\s+//g;
 	return $raw;
   }
 
@@ -179,8 +190,9 @@ package blanciai;{
 	my ($self, $type, $data) = @_;
 	my @bin = split //, sprintf("%b", hex($data));
 	$self->{log}->save('d', "binary: ". join("|", @bin)) if $self->{serial}->{'DEBUG'};
-	return $bin[3] if $type eq 'zero';
-	return $bin[5] if $type eq 'stab';
+	#return $bin[3] if $type eq 'zero';
+	#return $bin[5] if $type eq 'stab';
+	return $bin[6] if $type eq 'zero';
   }
 
   sub net_read {
