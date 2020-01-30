@@ -34,12 +34,15 @@ package blanciai;{
 	my $zero = $self->get_status('zero', &clean($ANSWER));
 	my $stab = $self->get_status('stab', &clean($ANSWER));
 
+
 	foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+		# get cell: DP
 		my $_command = $command->{'cell'} . $scales->{$scale};
 		$ANSWER = $self->_read($_command);
 		$calc_params{$scales->{$scale}}->{$_command} = &clean($ANSWER);
 
-		if ($zero == 1) {
+		if ( $zero == 1 ) {
+			# get coefficient_angle: DC
 			$_command = $command->{'coefficient_angle'} . $scales->{$scale};
 			$ANSWER = $self->_read($_command);
 			$calc_params{$scales->{$scale}}->{$_command} = &clean($ANSWER);
