@@ -92,17 +92,20 @@ package blanciai;{
 			$calc_params{$scales->{$scale}}->{'wi'} = $calc_params{'YP'} /
 													  $calc_params{$scales->{$scale}}->{'ki'};
 			# wi write to array for sql
-			$weights[$scales->{$scale}] = int($calc_params{$scales->{$scale}}->{'wi'}) if defined $calc_params{$scales->{$scale}}->{'wi'};
+			$weights[$scales->{$scale}] = sprintf("%.0f", $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} ) if defined $calc_params{$scales->{$scale}}->{'wi'};
 		}
 	}
 	
 	print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
 	$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
-	
+
 	if ( ! defined($calc_params{'Ps'}) ) {
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			$weights[$scales->{$scale}] = 0;
 		}
+		push @weights, 0, 0;
+	} else {
+		push @weights, sprintf("%.0f", $calc_params{$command->{'netto'}} * $self->{serial}->{'scale'}->{coefficient} );
 	}
 
 	# remove 0 array variable
