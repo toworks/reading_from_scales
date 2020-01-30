@@ -26,7 +26,7 @@ scales:
             protocol: udp
 
         scale:
-            command: {status: XZ, netto: YP, cell: DP}
+            command: {coefficient_angle: DC, status: XZ, netto: YP, cell: DP}
             # {8: 1} 8 - датчик 1 - поле в базе (load_sensor_1)
             alias: {8: 1, 7: 2, 6: 3, 4: 4, 5: 5, 3: 6, 2: 7, 1: 8}
             coefficient: 1000
