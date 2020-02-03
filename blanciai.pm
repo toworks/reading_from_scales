@@ -25,6 +25,8 @@ package blanciai;{
 
 	my (@weights, $command, $scales, $weight_platform1, $weight_platform2);
 
+eval {
+
 	$command = \%{$self->{serial}->{'scale'}->{'command'}};
 	$scales = \%{$self->{serial}->{'scale'}->{'alias'}};
 
@@ -34,6 +36,10 @@ package blanciai;{
 	my $zero = $self->get_status('zero', &clean($ANSWER));
 	my $stab = $self->get_status('stab', &clean($ANSWER));
 
+	# WghtT -> YP
+	my $_command = $command->{'netto'};
+	$ANSWER = $self->_read($_command);
+	$calc_params{$_command} = &clean($ANSWER);
 
 	foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 		# get cell: DP
@@ -41,11 +47,12 @@ package blanciai;{
 		$ANSWER = $self->_read($_command);
 		$calc_params{$scales->{$scale}}->{$_command} = &clean($ANSWER);
 
-		if ( $zero == 1 ) {
+		if ( defined($zero) and $zero eq 1 and ! defined $calc_params{$scales->{$scale}}->{'zi'} ) {
 			# get coefficient_angle: DC
 			$_command = $command->{'coefficient_angle'} . $scales->{$scale};
 			$ANSWER = $self->_read($_command);
-			$calc_params{$scales->{$scale}}->{$_command} = &clean($ANSWER);
+			$ANSWER =~ /\s*([\d\.\,]+)\s*([\d\.\,]+)/; # get first value $1 - first  $2 - two
+			$calc_params{$scales->{$scale}}->{$_command} = &clean($1);
 	
 			# pi = di*ki;
 			$calc_params{$scales->{$scale}}->{'pi0'} =
@@ -53,7 +60,7 @@ package blanciai;{
 						$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'} . $scales->{$scale}};
 			# При WghtT = 0 :  zi = pi;
 			$calc_params{$scales->{$scale}}->{'zi'} = $calc_params{$scales->{$scale}}->{'pi0'};
-		} elsif ( defined $calc_params{$scales->{$scale}}->{'pi0'} ) {		
+		} elsif ( defined $calc_params{$scales->{$scale}}->{'zi'} ) {		
 			# pi = di*ki;
 			$calc_params{$scales->{$scale}}->{'pi'} =
 						$calc_params{$scales->{$scale}}->{$command->{'cell'} . $scales->{$scale}} *
@@ -64,26 +71,18 @@ package blanciai;{
 		}
 	}
 
-	if ($zero != 1) {
-		# WghtT -> YP
-		my $_command = $command->{'netto'};
-		$ANSWER = $self->_read($_command);
-		$calc_params{$_command} = &clean($ANSWER);
-	}
-
-	if ( $zero != 1 and defined($calc_params{1}->{'pi0'}) ) {
-#	if ( $zero != 1 and ! defined($calc_params{'Ps'}) and defined($calc_params{1}->{'pi0'}) ) {
-#	if ( $zero != 1 and $stab == 1 and ! defined($calc_params{'Ps'}) and defined($calc_params{1}->{'pi0'}) ) {
-#	if ( $zero != 1 and $stab == 1 and ! defined($calc_params{'Ps'}) ) {
-		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+	# clean Ps
+	$calc_params{'Ps'} = 0;
+				
+	foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+		if ( $zero ne 1 and defined($calc_params{$scales->{$scale}}->{'zi'}) ) {
+			$self->{log}->save('d', "Ps p". $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{'pi'}) if $self->{serial}->{'DEBUG'};
 			# Ps = pi+pi+pi+pi+pi+pi+pi+pi;
 			$calc_params{'Ps'} += $calc_params{$scales->{$scale}}->{'pi'};
 		}
 	}
 
-	if (defined($calc_params{'Ps'}) ){
-#	if ( $zero != 1 and $stab == 1 and defined($calc_params{'Ps'}) ){
-#	if ( $zero != 1 and $stab == 1 ){	
+	if ( $zero ne 1 ){	
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			# ki = Ps/pi;
 			$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{'Ps'} /
@@ -116,7 +115,7 @@ package blanciai;{
 
 	# remove 0 array variable
 	splice @weights, 0, 1;# if $zero != 1;
-
+};
 	$self->{log}->save('d', Dumper(@weights) ) if $self->{serial}->{'DEBUG'};
 	
 	if ( @weights ) {
