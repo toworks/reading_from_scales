@@ -25,97 +25,99 @@ package blanciai;{
 
 	my (@weights, $command, $scales, $weight_platform1, $weight_platform2);
 
-eval {
+	eval {
 
-	$command = \%{$self->{serial}->{'scale'}->{'command'}};
-	$scales = \%{$self->{serial}->{'scale'}->{'alias'}};
+		$command = \%{$self->{serial}->{'scale'}->{'command'}};
+		$scales = \%{$self->{serial}->{'scale'}->{'alias'}};
 
-	print Dumper($command) if $self->{serial}->{'DEBUG'};
+		print Dumper($command) if $self->{serial}->{'DEBUG'};
 
-	$ANSWER = $self->_read($command->{'status'});
-	my $zero = $self->get_status('zero', &clean($ANSWER));
-	my $stab = $self->get_status('stab', &clean($ANSWER));
+		$ANSWER = $self->_read($command->{'status'});
+		my $zero = $self->get_status('zero', &clean($ANSWER));
+		my $stab = $self->get_status('stab', &clean($ANSWER));
 
-	# WghtT -> YP
-	my $_command = $command->{'netto'};
-	$ANSWER = $self->_read($_command);
-	$calc_params{$_command} = &clean($ANSWER);
-
-	foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-		# get cell: DP
-		my $_command = $command->{'cell'} . $scales->{$scale};
+		# WghtT -> YP
+		my $_command = $command->{'netto'};
 		$ANSWER = $self->_read($_command);
-		$calc_params{$scales->{$scale}}->{$_command} = &clean($ANSWER);
+		$calc_params{$_command} = &clean($ANSWER);
 
-		if ( defined($zero) and $zero eq 1 and ! defined $calc_params{$scales->{$scale}}->{'zi'} ) {
-			# get coefficient_angle: DC
-			$_command = $command->{'coefficient_angle'} . $scales->{$scale};
-			$ANSWER = $self->_read($_command);
-			$ANSWER =~ /\s*([\d\.\,]+)\s*([\d\.\,]+)/; # get first value $1 - first  $2 - two
-			$calc_params{$scales->{$scale}}->{$_command} = &clean($1);
-	
-			# pi = di*ki;
-			$calc_params{$scales->{$scale}}->{'pi0'} =
-						$calc_params{$scales->{$scale}}->{$command->{'cell'} . $scales->{$scale}} *
-						$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'} . $scales->{$scale}};
-			# При WghtT = 0 :  zi = pi;
-			$calc_params{$scales->{$scale}}->{'zi'} = $calc_params{$scales->{$scale}}->{'pi0'};
-		} elsif ( defined $calc_params{$scales->{$scale}}->{'zi'} ) {		
-			# pi = di*ki;
-			$calc_params{$scales->{$scale}}->{'pi'} =
-						$calc_params{$scales->{$scale}}->{$command->{'cell'} . $scales->{$scale}} *
-						$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'} . $scales->{$scale}};
-			# pi = pi – zi;
-			$calc_params{$scales->{$scale}}->{'pi'} = $calc_params{$scales->{$scale}}->{'pi'} -
-													  $calc_params{$scales->{$scale}}->{'zi'};
-		}
-	}
-
-	# clean Ps
-	$calc_params{'Ps'} = 0;
-				
-	foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-		if ( $zero ne 1 and defined($calc_params{$scales->{$scale}}->{'zi'}) ) {
-			$self->{log}->save('d', "Ps p". $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{'pi'}) if $self->{serial}->{'DEBUG'};
-			# Ps = pi+pi+pi+pi+pi+pi+pi+pi;
-			$calc_params{'Ps'} += $calc_params{$scales->{$scale}}->{'pi'};
-		}
-	}
-
-	if ( $zero ne 1 ){	
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-			# ki = Ps/pi;
-			$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{'Ps'} /
-													  $calc_params{$scales->{$scale}}->{'pi'};
-			# wi = WghtT/ki
-			$calc_params{$scales->{$scale}}->{'wi'} = $calc_params{'YP'} /
-													  $calc_params{$scales->{$scale}}->{'ki'};
-			if ( defined $calc_params{$scales->{$scale}}->{'wi'} ) {
-				# wi write to array for sql
-				$weights[$scales->{$scale}] = sprintf("%.0f", $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} );
-				# weight platforms
-				$weight_platform1 += $weights[$scales->{$scale}] if ( $scales->{$scale} <= 4 );
-				$weight_platform2 += $weights[$scales->{$scale}] if ( $scales->{$scale} > 4 and $scales->{$scale} <= 8 );
+			# get cell: DP
+			my $_command = $command->{'cell'} . $scales->{$scale};
+			$ANSWER = $self->_read($_command);
+			$calc_params{$scales->{$scale}}->{$_command} = &clean($ANSWER);
+
+			if ( defined($zero) and $zero eq 1 and ! defined $calc_params{$scales->{$scale}}->{'zi'} ) {
+				# get coefficient_angle: DC
+				$_command = $command->{'coefficient_angle'} . $scales->{$scale};
+				$ANSWER = $self->_read($_command);
+				$ANSWER =~ /\s*([\d\.\,]+)\s*([\d\.\,]+)/; # get first value $1 - first  $2 - two
+				$calc_params{$scales->{$scale}}->{$_command} = &clean($1);
+		
+				# pi = di*ki;
+				$calc_params{$scales->{$scale}}->{'pi0'} =
+							$calc_params{$scales->{$scale}}->{$command->{'cell'} . $scales->{$scale}} *
+							$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'} . $scales->{$scale}};
+				# При WghtT = 0 :  zi = pi;
+				$calc_params{$scales->{$scale}}->{'zi'} = $calc_params{$scales->{$scale}}->{'pi0'};
+			} elsif ( defined $calc_params{$scales->{$scale}}->{'zi'} ) {		
+				# pi = di*ki;
+				$calc_params{$scales->{$scale}}->{'pi'} =
+							$calc_params{$scales->{$scale}}->{$command->{'cell'} . $scales->{$scale}} *
+							$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'} . $scales->{$scale}};
+				# pi = pi – zi;
+				$calc_params{$scales->{$scale}}->{'pi'} = $calc_params{$scales->{$scale}}->{'pi'} -
+														  $calc_params{$scales->{$scale}}->{'zi'};
 			}
 		}
-	}
-	
-	print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
-	$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
 
-	if ( ! defined($calc_params{'Ps'}) ) {
+		# clean Ps
+		$calc_params{'Ps'} = 0;
+					
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-			$weights[$scales->{$scale}] = 0;
+			if ( $zero ne 1 and defined($calc_params{$scales->{$scale}}->{'zi'}) ) {
+				$self->{log}->save('d', "Ps p". $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{'pi'}) if $self->{serial}->{'DEBUG'};
+				# Ps = pi+pi+pi+pi+pi+pi+pi+pi;
+				$calc_params{'Ps'} += $calc_params{$scales->{$scale}}->{'pi'};
+			}
 		}
-		#push @weights, sprintf("%.0f", (62.65 + 97.546 + 130 + 196) * $self->{serial}->{'scale'}->{coefficient}), (2 + (-8) + (-240) + (-154)) * $self->{serial}->{'scale'}->{coefficient};
-		push @weights, 0, 0;
-	} else {
-		push @weights, $weight_platform1, $weight_platform2;
-	}
 
-	# remove 0 array variable
-	splice @weights, 0, 1;# if $zero != 1;
-};
+		if ( $zero ne 1 ){	
+			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+				# ki = Ps/pi;
+				$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{'Ps'} /
+														  $calc_params{$scales->{$scale}}->{'pi'};
+				# wi = WghtT/ki
+				$calc_params{$scales->{$scale}}->{'wi'} = $calc_params{'YP'} /
+														  $calc_params{$scales->{$scale}}->{'ki'};
+				if ( defined $calc_params{$scales->{$scale}}->{'wi'} ) {
+					# wi write to array for sql
+					$weights[$scales->{$scale}] = sprintf("%.0f", $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} );
+					# weight platforms
+					$weight_platform1 += $weights[$scales->{$scale}] if ( $scales->{$scale} <= 4 );
+					$weight_platform2 += $weights[$scales->{$scale}] if ( $scales->{$scale} > 4 and $scales->{$scale} <= 8 );
+				}
+			}
+		}
+		
+		print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
+		$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
+
+		if ( ! defined($calc_params{'Ps'}) ) {
+			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+				$weights[$scales->{$scale}] = 0;
+			}
+			#push @weights, sprintf("%.0f", (62.65 + 97.546 + 130 + 196) * $self->{serial}->{'scale'}->{coefficient}), (2 + (-8) + (-240) + (-154)) * $self->{serial}->{'scale'}->{coefficient};
+			push @weights, 0, 0;
+		} else {
+			push @weights, $weight_platform1, $weight_platform2;
+		}
+
+		# remove 0 array variable
+		splice @weights, 0, 1;# if $zero != 1;
+	};
+	if($@) { $self->{log}->save("e", "$@") };
+
 	$self->{log}->save('d', Dumper(@weights) ) if $self->{serial}->{'DEBUG'};
 	
 	if ( @weights ) {
