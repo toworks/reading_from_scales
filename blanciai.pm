@@ -84,7 +84,7 @@ package blanciai;{
 			}
 		}
 
-		if ( defined($zero) and $zero ne 1 and $calc_params{'Ps'} ne 0 ){	
+		if ( defined($zero) and $zero ne 1 ){	
 			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 				# ki = Ps/pi;
 				$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{'Ps'} /
@@ -106,7 +106,7 @@ package blanciai;{
 		$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
 
 
-		if ( $calc_params{'Ps'} eq 0 ) {		
+		if ( defined($zero) and $zero ne 1 ) {		
 			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 				$weights[$scales->{$scale}] = 0;
 			}
