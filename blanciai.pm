@@ -35,6 +35,7 @@ package blanciai;{
 		print Dumper($command) if $self->{serial}->{'DEBUG'};
 
 		$ANSWER = $self->_read($command->{'status'});
+		return if $self->{connection} =~ /serial/ and $self->get('error') == 1;
 		my $zero = $self->get_status('zero', &clean($ANSWER));
 		my $stab = $self->get_status('stab', &clean($ANSWER));
 
@@ -65,7 +66,8 @@ package blanciai;{
 							$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'} . $scales->{$scale}};
 				# При WghtT = 0 :  zi = pi;
 				$calc_params{$scales->{$scale}}->{'zi'} = $calc_params{$scales->{$scale}}->{'pi0'};
-			} elsif ( defined $calc_params{$scales->{$scale}}->{'zi'} ) {		
+			}
+			if ( defined($zero) and $zero eq 0 and defined $calc_params{$scales->{$scale}}->{'zi'} ) {
 				# pi = di*ki;
 				$calc_params{$scales->{$scale}}->{'pi'} =
 							$calc_params{$scales->{$scale}}->{$command->{'cell'} . $scales->{$scale}} *
@@ -105,8 +107,7 @@ package blanciai;{
 		print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
 		$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
 
-
-		if ( defined($zero) and $zero eq 1 ) {		
+		if ( ( defined($zero) and $zero eq 1 )) {		
 			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 				$weights[$scales->{$scale}] = 0;
 			}
@@ -149,18 +150,23 @@ package blanciai;{
 		
 	if ( $self->{connection} =~ /serial/ ) {
 		$self->connect() if $self->get('error') == 1;
-			
 		return if $self->get('error') == 1;
 
 		#eval{ $readline = $self->{fh}->input || die "$!"; };
 		#if($@) { $self->{log}->save("e", "$@") };
 
 		eval{ $readline = $self->{fh}->write($REQUEST) || die "$!"; };
-		if($@) { $self->{log}->save("e", "$@") };
-
+		if($@) { $self->{log}->save("e", "$@");
+				 $self->set('error' => 1);
+		};
+		
+		return if $self->get('error') == 1;
+		
 		$self->{log}->save('d', "request count: $readline") if $self->{serial}->{'DEBUG'};
 		eval{ $readline = $self->{fh}->read(255) || die "$!"; };
-		if($@) { $self->{log}->save("e", "$@") };
+		if($@) { $self->{log}->save("e", "$@");
+				 $self->set('error' => 1);
+		};
 		$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
 	} else {
 		$readline = $self->net_read($REQUEST);
@@ -169,34 +175,9 @@ package blanciai;{
 	return $readline || "";
   }
 
-  sub processing {
-	my ($self, $raw) = @_;
-	my $weight;
-	$self->{log}->save('d', "processing raw: $raw") if $self->{serial}->{'DEBUG'};
-	return if $raw !~ /(\s).*/;
-	($self->{answer}->{weight}, $self->{answer}->{unit}, $self->{answer}->{command}) = split(" ", $raw);
-	$self->{log}->save('d', "answer:    command: '".$self->{answer}->{command}."'  ".
-							"weight: '".$self->{answer}->{weight}."'  ".
-							"unit: '".$self->{answer}->{unit}."'"
-	) if $self->{serial}->{'DEBUG'};
-
-
-	$self->{answer}->{weight} =~ s/,//g;
-	$self->{log}->save('d', "stable weight: ".$self->{answer}->{weight}) if $self->{serial}->{'DEBUG'};
-	if ( $self->{answer}->{unit} =~ /kg/ ) {
-		$weight = $self->{answer}->{weight};
-	} elsif ( $self->{answer}->{unit} =~ /g/ ) {
-		$weight = $self->{answer}->{weight} * $self->{serial}->{'scale'}->{coefficient};
-	} elsif ( $self->{answer}->{unit} =~ /\A\z/ ) {
-#		$weight = $self->{answer}->{weight} / $self->{serial}->{'scale'}->{coefficient};
-		$weight = $self->{answer}->{weight};
-	}
-
-	return $weight;
-  }
-
   sub clean {
 	my ($raw) = @_;
+	return if ! defined($raw);
 	$raw =~ s/[^[:print:]]+//g;
 	$raw =~ s/\s+//g;
 	return $raw;
@@ -204,11 +185,17 @@ package blanciai;{
 
   sub get_status {
 	my ($self, $type, $data) = @_;
+	my $ret;
 	my @bin = split //, sprintf("%b", hex($data));
-	$self->{log}->save('d', "binary: ". join("|", @bin)) if $self->{serial}->{'DEBUG'};
-	#return $bin[3] if $type eq 'zero';
-	#return $bin[5] if $type eq 'stab';
-	return $bin[6] if $type eq 'zero';
+	if ( $#bin <= 9 ) {
+		$self->{log}->save('e', "binary no valid count: ". $#bin);
+	} else {
+		$self->{log}->save('d', "binary: ". join("|", @bin)) if $self->{serial}->{'DEBUG'};
+		#return $bin[3] if $type eq 'zero';
+		#return $bin[5] if $type eq 'stab';
+		$ret = $bin[6] if $type eq 'zero';
+	}
+	return $ret;
   }
 
   sub net_read {
