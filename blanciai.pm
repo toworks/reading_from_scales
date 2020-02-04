@@ -106,7 +106,7 @@ package blanciai;{
 		$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
 
 
-		if ( defined($zero) and $zero ne 1 ) {		
+		if ( defined($zero) and $zero eq 1 ) {		
 			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 				$weights[$scales->{$scale}] = 0;
 			}
