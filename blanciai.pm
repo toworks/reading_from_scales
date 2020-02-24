@@ -187,7 +187,7 @@ package blanciai;{
 	my ($self, $type, $data) = @_;
 	my $ret;
 	my @bin = split //, sprintf("%b", hex($data));
-	if ( $#bin <= 9 ) {
+	if ( $#bin <= 2 ) {
 		$self->{log}->save('e', "binary no valid count: ". $#bin);
 	} else {
 		$self->{log}->save('d', "binary: ". join("|", @bin)) if $self->{serial}->{'DEBUG'};
