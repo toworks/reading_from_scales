@@ -37,7 +37,9 @@ package blanciai;{
 		$ANSWER = $self->_read($command->{'status'});
 		return if $self->{connection} =~ /serial/ and $self->get('error') == 1;
 		my $zero = $self->get_status('zero', &clean($ANSWER));
+		return unless defined($zero);
 		my $stab = $self->get_status('stab', &clean($ANSWER));
+		return unless defined($stab);
 
 		# WghtT -> YP
 		my $_command = $command->{'netto'};
