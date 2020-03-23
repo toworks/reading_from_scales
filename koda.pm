@@ -63,8 +63,12 @@ package koda;{
 	}
 
 	$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
-
-	return $self->processing($readline);
+	
+	if ( defined($readline) ) {
+		return $self->processing($readline);
+	} else {
+		return undef;
+	}
   }
 
   sub processing {
