@@ -87,6 +87,11 @@ package koda;{
 	push @weight, $_raw[14] * $const + $_raw[15] * 4 + ($_raw[19] & 3);
 	push @weight, $_raw[16] * $const + $_raw[17] * 4 + (($_raw[20] >> 5) & 3);
 
+	my $weight_platform1 =
+	my $weight_platform2 =
+	
+	push @weight, $weight_platform1, $weight_platform2;
+	
 	$self->{log}->save('d', "processing weight: " . Dumper(@weight) ) if $self->{serial}->{'DEBUG'};
 
 	return \@weight;
