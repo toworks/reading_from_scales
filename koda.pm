@@ -78,14 +78,14 @@ package koda;{
 	$self->{log}->save('d', "processing raw bin: " . join(" | ", @_raw) ) if $self->{serial}->{'DEBUG'};
 
 	my $const = 512;
-	push @weight_raw, 1;#$_raw[2]  * $const + $_raw[3] * 4 + (($_raw[18] >> 5) & 3);
-	push @weight_raw, 2;#$_raw[4]  * $const + $_raw[5] * 4 + (($_raw[18] >> 3) & 3);
-	push @weight_raw, 3;#$_raw[6]  * $const + $_raw[7] * 4 + (($_raw[18] >> 1) & 3);
-	push @weight_raw, 4;#$_raw[8]  * $const + $_raw[9] * 4 + (($_raw[18] >> 1) & 2) + (($_raw[19] >> 6) & 1);
-	push @weight_raw, 11;#$_raw[10] * $const + $_raw[11] * 4 + (($_raw[19] >> 4) & 3);
-	push @weight_raw, 12;#$_raw[12] * $const + $_raw[13] * 4 + (($_raw[19] >> 2) & 3);
-	push @weight_raw, 13;#$_raw[14] * $const + $_raw[15] * 4 + ($_raw[19] & 3);
-	push @weight_raw, 14;#$_raw[16] * $const + $_raw[17] * 4 + (($_raw[20] >> 5) & 3);
+	push @weight_raw, $_raw[2]  * $const + $_raw[3] * 4 + (($_raw[18] >> 5) & 3);
+	push @weight_raw, $_raw[4]  * $const + $_raw[5] * 4 + (($_raw[18] >> 3) & 3);
+	push @weight_raw, $_raw[6]  * $const + $_raw[7] * 4 + (($_raw[18] >> 1) & 3);
+	push @weight_raw, $_raw[8]  * $const + $_raw[9] * 4 + (($_raw[18] >> 1) & 2) + (($_raw[19] >> 6) & 1);
+	push @weight_raw, $_raw[10] * $const + $_raw[11] * 4 + (($_raw[19] >> 4) & 3);
+	push @weight_raw, $_raw[12] * $const + $_raw[13] * 4 + (($_raw[19] >> 2) & 3);
+	push @weight_raw, $_raw[14] * $const + $_raw[15] * 4 + ($_raw[19] & 3);
+	push @weight_raw, $_raw[16] * $const + $_raw[17] * 4 + (($_raw[20] >> 5) & 3);
 	
 	$self->{log}->save('d', "processing weight before alias: " . Dumper(@weight_raw) ) if $self->{serial}->{'DEBUG'};
 	
