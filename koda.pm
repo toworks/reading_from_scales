@@ -69,7 +69,7 @@ package koda;{
 
   sub processing {
 	my ($self, $raw) = @_;
-	my @weight;
+	my (@weight_raw, @weights, $weight_platform1, $weight_platform2);
 
 	#my @_raw = map {  sprintf("%d", hex($_)) } ($raw =~ /(.)/g);
 	my @_raw = map {  sprintf("%b", hex($_)) } ($raw =~ /(.)/g);
@@ -78,23 +78,34 @@ package koda;{
 	$self->{log}->save('d', "processing raw bin: " . join(" | ", @_raw) ) if $self->{serial}->{'DEBUG'};
 
 	my $const = 512;
-	push @weight, $_raw[2]  * $const + $_raw[3] * 4 + (($_raw[18] >> 5) & 3);
-	push @weight, $_raw[4]  * $const + $_raw[5] * 4 + (($_raw[18] >> 3) & 3);
-	push @weight, $_raw[6]  * $const + $_raw[7] * 4 + (($_raw[18] >> 1) & 3);
-	push @weight, $_raw[8]  * $const + $_raw[9] * 4 + (($_raw[18] >> 1) & 2) + (($_raw[19] >> 6) & 1);
-	push @weight, $_raw[10] * $const + $_raw[11] * 4 + (($_raw[19] >> 4) & 3);
-	push @weight, $_raw[12] * $const + $_raw[13] * 4 + (($_raw[19] >> 2) & 3);
-	push @weight, $_raw[14] * $const + $_raw[15] * 4 + ($_raw[19] & 3);
-	push @weight, $_raw[16] * $const + $_raw[17] * 4 + (($_raw[20] >> 5) & 3);
-
-	my $weight_platform1 =
-	my $weight_platform2 =
+	push @weight_raw, 1;#$_raw[2]  * $const + $_raw[3] * 4 + (($_raw[18] >> 5) & 3);
+	push @weight_raw, 2;#$_raw[4]  * $const + $_raw[5] * 4 + (($_raw[18] >> 3) & 3);
+	push @weight_raw, 3;#$_raw[6]  * $const + $_raw[7] * 4 + (($_raw[18] >> 1) & 3);
+	push @weight_raw, 4;#$_raw[8]  * $const + $_raw[9] * 4 + (($_raw[18] >> 1) & 2) + (($_raw[19] >> 6) & 1);
+	push @weight_raw, 11;#$_raw[10] * $const + $_raw[11] * 4 + (($_raw[19] >> 4) & 3);
+	push @weight_raw, 12;#$_raw[12] * $const + $_raw[13] * 4 + (($_raw[19] >> 2) & 3);
+	push @weight_raw, 13;#$_raw[14] * $const + $_raw[15] * 4 + ($_raw[19] & 3);
+	push @weight_raw, 14;#$_raw[16] * $const + $_raw[17] * 4 + (($_raw[20] >> 5) & 3);
 	
-	push @weight, $weight_platform1, $weight_platform2;
+	$self->{log}->save('d', "processing weight before alias: " . Dumper(@weight_raw) ) if $self->{serial}->{'DEBUG'};
 	
-	$self->{log}->save('d', "processing weight: " . Dumper(@weight) ) if $self->{serial}->{'DEBUG'};
+	for (my $i = 0; $i <= $#weight_raw; $i++) {
+		if ( $self->{serial}->{scale}->{alias}->{$i} le 3 ) {
+			$weight_platform1 += $weight_raw[$i];
+		} else {
+			$weight_platform2 += $weight_raw[$i];
+		}
+		$weights[$self->{serial}->{scale}->{alias}->{$i+1}] = $weight_raw[$i];
+	}
 
-	return \@weight;
+	push @weights, $weight_platform1, $weight_platform2;
+
+	# remove 0 array variable
+	splice @weights, 0, 1;
+
+	$self->{log}->save('d', "processing weight after alias: " . Dumper(@weights) ) if $self->{serial}->{'DEBUG'};
+
+	return \@weights;
   }
 
   sub net_read {
