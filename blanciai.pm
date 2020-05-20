@@ -4,6 +4,8 @@ package blanciai;{
   use utf8;
   use lib 'libs';
   use parent "serial";
+  use POSIX qw(strftime);
+  use cache;
   use Data::Dumper;
 
 #	протокол: remote commands protocol
@@ -34,26 +36,39 @@ package blanciai;{
 
 		print Dumper($command) if $self->{serial}->{'DEBUG'};
 
+		# testing first running
+		if ( ! defined($calc_params{$command->{'netto'}}) ) { %calc_params = %{$self->{serial}->{'cache'}->{'cache'}->{'cache'}}; }
+
+		# step 1: XZ - статус весов 
 		$ANSWER = $self->_read($command->{'status'});
 		return if $self->{connection} =~ /serial/ and $self->get('error') == 1;
 		my $zero = $self->get_status('zero', &clean($ANSWER));
-		#return unless defined($zero);
-		my $stab = $self->get_status('stab', &clean($ANSWER));
-		#return unless defined($stab);
+#		my $stab = $self->get_status('stab', &clean($ANSWER));
 
-		# WghtT -> YP
+		# step 2: WghtT -> YP - вес нетто
 		my $_command = $command->{'netto'};
 		$ANSWER = $self->_read($_command);
 		$calc_params{$_command} = &clean($ANSWER);
 		undef($ANSWER);
 
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-			# get cell: DP
+			# step3: DP - значение ячейки (points)
 			my $_command = $command->{'cell'} . $scales->{$scale};
 			$ANSWER = $self->_read($_command);
 			$calc_params{$scales->{$scale}}->{$_command} = &clean($ANSWER);
 			undef($ANSWER);
+		}
+		
+		# update cache
+		if ( $zero eq 1 ) {
+			$self->{serial}->{'cache'}->set('cache' => \%calc_params);
+			$self->{serial}->{'cache'}->set('timestamp' => strftime("%Y-%m-%d %H:%M:%S", localtime time));
+			$self->{serial}->{'cache'}->save();
+		} else {
+			print "\n\n\n";
+		}
 
+=comment
 			if ( defined($zero) and $zero eq 1 and ! defined $calc_params{$scales->{$scale}}->{'zi'} ) {
 				# get coefficient_angle: DC
 				$_command = $command->{'coefficient_angle'} . $scales->{$scale};
@@ -78,8 +93,12 @@ package blanciai;{
 				$calc_params{$scales->{$scale}}->{'pi'} = $calc_params{$scales->{$scale}}->{'pi'} -
 														  $calc_params{$scales->{$scale}}->{'zi'};
 			}
-		}
-				
+=cut			
+
+print Dumper(\%calc_params);
+
+exit;
+
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			if ( defined($zero) and $zero ne 1 and defined($calc_params{$scales->{$scale}}->{'zi'}) ) {
 				$self->{log}->save('d', "Ps p". $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{'pi'}) if $self->{serial}->{'DEBUG'};
@@ -169,10 +188,11 @@ package blanciai;{
 		if($@) { $self->{log}->save("e", "$@");
 				 $self->set('error' => 1);
 		};
-		$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
 	} else {
 		$readline = $self->net_read($REQUEST);
 	}
+
+	$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
 
 	return $readline || "";
   }
@@ -189,8 +209,9 @@ package blanciai;{
 	my ($self, $type, $data) = @_;
 	my $ret;
 	my @bin = split //, sprintf("%b", hex($data));
-	if ( $#bin <= 2 ) {
-		$self->{log}->save('e', "binary no valid count: ". $#bin);
+	if ( ! defined($bin[6]) and $type eq 'zero' ) {
+		$self->{log}->save('e', "binary command 'zero'    count: ". $#bin);
+		$ret = 0;
 	} else {
 		$self->{log}->save('d', "binary: ". join("|", @bin)) if $self->{serial}->{'DEBUG'};
 		#return $bin[3] if $type eq 'zero';
