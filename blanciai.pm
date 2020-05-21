@@ -39,35 +39,53 @@ package blanciai;{
 		# testing first running
 		if ( ! defined($calc_params{$command->{'netto'}}) ) { %calc_params = %{$self->{serial}->{'cache'}->{'cache'}->{'cache'}}; }
 
-		# step 1: XZ - статус весов 
+		# step 1: <status> XZ - статус весов 
 		$ANSWER = $self->_read($command->{'status'});
 		return if $self->{connection} =~ /serial/ and $self->get('error') == 1;
 		my $zero = $self->get_status('zero', &clean($ANSWER));
 #		my $stab = $self->get_status('stab', &clean($ANSWER));
 
-		# step 2: WghtT -> YP - вес нетто
+		# step 2: WghtT -> <netto> YP - вес нетто
 		my $_command = $command->{'netto'};
 		$ANSWER = $self->_read($_command);
 		$calc_params{$_command} = &clean($ANSWER);
 		undef($ANSWER);
 
+		# step3: <cell> DP - значение ячейки (points)
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-			# step3: DP - значение ячейки (points)
 			my $_command = $command->{'cell'} . $scales->{$scale};
 			$ANSWER = $self->_read($_command);
 			$calc_params{$scales->{$scale}}->{$_command} = &clean($ANSWER);
 			undef($ANSWER);
 		}
-		
-		# update cache
-		if ( $zero eq 1 ) {
-			$self->{serial}->{'cache'}->set('cache' => \%calc_params);
-			$self->{serial}->{'cache'}->set('timestamp' => strftime("%Y-%m-%d %H:%M:%S", localtime time));
-			$self->{serial}->{'cache'}->save();
-		} else {
-			print "\n\n\n";
+
+		# step4: <coefficient_angle> DC - коэффициент калибровки угла
+		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+			$_command = $command->{'coefficient_angle'} . $scales->{$scale};
+			$ANSWER = $self->_read($_command);
+			$ANSWER =~ /\s*([\d\.\,]+)\s*([\d\.\,]+)/; # get first value $1 - first  $2 - two
+			$calc_params{$scales->{$scale}}->{$_command} = &clean($1);
+			undef($ANSWER);
 		}
 
+		# update cache
+		if ( $zero eq 1 ) {
+			my %cache;
+			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+						$self->{log}->save('d', "zero point update cache: ". $command->{'cell'} . $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{$command->{'cell'}.$scales->{$scale}}) if $self->{serial}->{'DEBUG'};
+						$cache{$scales->{$scale}}{$command->{'cell'}} = $calc_params{$scales->{$scale}}->{$command->{'cell'}.$scales->{$scale}};
+						$self->{log}->save('d', "zero point update cache: ". $command->{'coefficient_angle'} . $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}.$scales->{$scale}}) if $self->{serial}->{'DEBUG'};
+						$cache{$scales->{$scale}}{$command->{'coefficient_angle'}} = $calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}.$scales->{$scale}};
+			}
+			$self->{serial}->{'cache'}->set('cache' => \%cache);
+			$self->{serial}->{'cache'}->set('timestamp' => strftime("%Y-%m-%d %H:%M:%S", localtime time));
+			$self->{serial}->{'cache'}->save();
+		}
+
+
+#		if ( $zero eq 1 ) {
+		
+#		}
 =comment
 			if ( defined($zero) and $zero eq 1 and ! defined $calc_params{$scales->{$scale}}->{'zi'} ) {
 				# get coefficient_angle: DC
@@ -95,7 +113,7 @@ package blanciai;{
 			}
 =cut			
 
-print Dumper(\%calc_params);
+#print Dumper(\%calc_params);
 
 exit;
 
