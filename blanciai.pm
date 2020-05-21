@@ -51,41 +51,55 @@ package blanciai;{
 		$calc_params{$_command} = &clean($ANSWER);
 		undef($ANSWER);
 
-		# step3: <cell> DP - значение ячейки (points)
+		# step 3: <cell> DP - значение ячейки (points)
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			my $_command = $command->{'cell'} . $scales->{$scale};
 			$ANSWER = $self->_read($_command);
-			$calc_params{$scales->{$scale}}->{$_command} = &clean($ANSWER);
+			$calc_params{$scales->{$scale}}->{ $command->{'cell'}} = &clean($ANSWER);
 			undef($ANSWER);
 		}
 
-		# step4: <coefficient_angle> DC - коэффициент калибровки угла
+		# step 4: <coefficient_angle> DC - коэффициент калибровки угла
+		if ( $zero eq 1 ) {
+			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+				$_command = $command->{'coefficient_angle'} . $scales->{$scale};
+				$ANSWER = $self->_read($_command);
+				$ANSWER =~ /\s*([\d\.\,]+)\s*([\d\.\,]+)/; # get first value $1 - first  $2 - two
+				$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}} = &clean($1);
+				undef($ANSWER);
+			}
+		}
+
+		# step 5: pi = di*ki;
 		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-			$_command = $command->{'coefficient_angle'} . $scales->{$scale};
-			$ANSWER = $self->_read($_command);
-			$ANSWER =~ /\s*([\d\.\,]+)\s*([\d\.\,]+)/; # get first value $1 - first  $2 - two
-			$calc_params{$scales->{$scale}}->{$_command} = &clean($1);
-			undef($ANSWER);
+			$calc_params{$scales->{$scale}}->{'pi'} =
+							$calc_params{$scales->{$scale}}->{$command->{'cell'}} *
+							$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}};
 		}
 
-		# update cache
 		if ( $zero eq 1 ) {
 			my %cache;
+			# update cache
 			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-						$self->{log}->save('d', "zero point update cache: ". $command->{'cell'} . $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{$command->{'cell'}.$scales->{$scale}}) if $self->{serial}->{'DEBUG'};
-						$cache{$scales->{$scale}}{$command->{'cell'}} = $calc_params{$scales->{$scale}}->{$command->{'cell'}.$scales->{$scale}};
-						$self->{log}->save('d', "zero point update cache: ". $command->{'coefficient_angle'} . $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}.$scales->{$scale}}) if $self->{serial}->{'DEBUG'};
-						$cache{$scales->{$scale}}{$command->{'coefficient_angle'}} = $calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}.$scales->{$scale}};
+						$self->{log}->save('d', "zero point update cache: ". $command->{'cell'} . $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{$command->{'cell'}}) if $self->{serial}->{'DEBUG'};
+						$cache{$scales->{$scale}}{$command->{'cell'}} = $calc_params{$scales->{$scale}}->{$command->{'cell'}};
+						$self->{log}->save('d', "zero point update cache: ". $command->{'coefficient_angle'} . $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}}) if $self->{serial}->{'DEBUG'};
+						$cache{$scales->{$scale}}{$command->{'coefficient_angle'}} = $calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}};
+						$self->{log}->save('d', "zero point update cache: zi". $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{'pi'}) if $self->{serial}->{'DEBUG'};
+						$cache{$scales->{$scale}}{'zi'} = $calc_params{$scales->{$scale}}->{'pi'};
 			}
 			$self->{serial}->{'cache'}->set('cache' => \%cache);
 			$self->{serial}->{'cache'}->set('timestamp' => strftime("%Y-%m-%d %H:%M:%S", localtime time));
 			$self->{serial}->{'cache'}->save();
 		}
 
+		# step 6: При WghtT = 0 :  zi = pi;
+		if ( $zero eq 1 ) {
+			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+				$calc_params{$scales->{$scale}}->{'zi'} = $calc_params{$scales->{$scale}}->{'pi'};
+			}
+		}
 
-#		if ( $zero eq 1 ) {
-		
-#		}
 =comment
 			if ( defined($zero) and $zero eq 1 and ! defined $calc_params{$scales->{$scale}}->{'zi'} ) {
 				# get coefficient_angle: DC
@@ -113,7 +127,7 @@ package blanciai;{
 			}
 =cut			
 
-#print Dumper(\%calc_params);
+print Dumper(\%calc_params);
 
 exit;
 
