@@ -48,22 +48,25 @@ package blanciai;{
 		# step 2: WghtT -> <netto> YP - вес нетто
 		my $_command = $command->{'netto'};
 		$ANSWER = $self->_read($_command);
+		#return if $self->get('error') == 1;
 		$calc_params{$_command} = &clean($ANSWER);
 		undef($ANSWER);
 
 		# step 3: <cell> DP - значение ячейки (points)
-		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+		foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			my $_command = $command->{'cell'} . $scales->{$scale};
 			$ANSWER = $self->_read($_command);
+			#return if $self->get('error') == 1;
 			$calc_params{$scales->{$scale}}->{ $command->{'cell'}} = &clean($ANSWER);
 			undef($ANSWER);
 		}
 
 		# step 4: <coefficient_angle> DC - коэффициент калибровки угла
 		if ( $zero eq 1 ) {
-			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+			foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 				$_command = $command->{'coefficient_angle'} . $scales->{$scale};
 				$ANSWER = $self->_read($_command);
+				#return if $self->get('error') == 1;
 				$ANSWER =~ /\s*([\d\.\,]+)\s*([\d\.\,]+)/; # get first value $1 - first  $2 - two
 				$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}} = &clean($1);
 				undef($ANSWER);
@@ -71,7 +74,7 @@ package blanciai;{
 		}
 
 		# step 5: pi = di*ki;
-		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+		foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			$calc_params{$scales->{$scale}}->{'pi'} =
 							$calc_params{$scales->{$scale}}->{$command->{'cell'}} *
 							$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}};
@@ -80,7 +83,7 @@ package blanciai;{
 		if ( $zero eq 1 ) {
 			my %cache;
 			# update cache
-			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+			foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 						$self->{log}->save('d', "zero point update cache: ". $command->{'cell'} . $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{$command->{'cell'}}) if $self->{serial}->{'DEBUG'};
 						$cache{$scales->{$scale}}{$command->{'cell'}} = $calc_params{$scales->{$scale}}->{$command->{'cell'}};
 						$self->{log}->save('d', "zero point update cache: ". $command->{'coefficient_angle'} . $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}}) if $self->{serial}->{'DEBUG'};
@@ -95,56 +98,34 @@ package blanciai;{
 
 		# step 6: При WghtT = 0 :  zi = pi;
 		if ( $zero eq 1 ) {
-			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+			foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 				$calc_params{$scales->{$scale}}->{'zi'} = $calc_params{$scales->{$scale}}->{'pi'};
 			}
 		}
 
-=comment
-			if ( defined($zero) and $zero eq 1 and ! defined $calc_params{$scales->{$scale}}->{'zi'} ) {
-				# get coefficient_angle: DC
-				$_command = $command->{'coefficient_angle'} . $scales->{$scale};
-				$ANSWER = $self->_read($_command);
-				$ANSWER =~ /\s*([\d\.\,]+)\s*([\d\.\,]+)/; # get first value $1 - first  $2 - two
-				$calc_params{$scales->{$scale}}->{$_command} = &clean($1);
-				undef($ANSWER);
-		
-				# pi = di*ki;
-				$calc_params{$scales->{$scale}}->{'pi0'} =
-							$calc_params{$scales->{$scale}}->{$command->{'cell'} . $scales->{$scale}} *
-							$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'} . $scales->{$scale}};
-				# При WghtT = 0 :  zi = pi;
-				$calc_params{$scales->{$scale}}->{'zi'} = $calc_params{$scales->{$scale}}->{'pi0'};
-			}
-			if ( defined($zero) and $zero eq 0 and defined $calc_params{$scales->{$scale}}->{'zi'} ) {
-				# pi = di*ki;
-				$calc_params{$scales->{$scale}}->{'pi'} =
-							$calc_params{$scales->{$scale}}->{$command->{'cell'} . $scales->{$scale}} *
-							$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'} . $scales->{$scale}};
-				# pi = pi – zi;
+		# step 7: При WghtT ≠ 0 : pi = pi – zi;
+		if ( $zero eq 0 ) {
+			foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 				$calc_params{$scales->{$scale}}->{'pi'} = $calc_params{$scales->{$scale}}->{'pi'} -
 														  $calc_params{$scales->{$scale}}->{'zi'};
 			}
-=cut			
-
-print Dumper(\%calc_params);
-
-exit;
-
-		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-			if ( defined($zero) and $zero ne 1 and defined($calc_params{$scales->{$scale}}->{'zi'}) ) {
-				$self->{log}->save('d', "Ps p". $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{'pi'}) if $self->{serial}->{'DEBUG'};
-				# Ps = pi+pi+pi+pi+pi+pi+pi+pi;
-				$calc_params{'Ps'} += $calc_params{$scales->{$scale}}->{'pi'};
-			}
 		}
 
-		if ( defined($zero) and $zero ne 1 ){	
+		# step 8: Ps = pi+pi+pi+pi+pi+pi+pi+pi;
+		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+			#if ( defined($zero) and $zero ne 1 and defined($calc_params{$scales->{$scale}}->{'zi'}) ) {
+				$self->{log}->save('d', "Ps p". $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{'pi'}) if $self->{serial}->{'DEBUG'};
+				$calc_params{'Ps'} += $calc_params{$scales->{$scale}}->{'pi'};
+			#}
+		}		
+
+
+		if ( $zero eq 0 ) {	
 			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-				# ki = Ps/pi;
+				# step 9: ki = Ps/pi;
 				$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{'Ps'} /
 														  $calc_params{$scales->{$scale}}->{'pi'};
-				# wi = WghtT/ki
+				# step 10: wi = WghtT/ki
 				$calc_params{$scales->{$scale}}->{'wi'} = $calc_params{'YP'} /
 														  $calc_params{$scales->{$scale}}->{'ki'};
 				if ( defined $calc_params{$scales->{$scale}}->{'wi'} ) {
@@ -160,28 +141,16 @@ exit;
 		print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
 		$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
 
-		if ( ( defined($zero) and $zero eq 1 )) {		
-			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-				$weights[$scales->{$scale}] = 0;
-			}
-			#push @weights, sprintf("%.0f", (62.65 + 97.546 + 130 + 196) * $self->{serial}->{'scale'}->{coefficient}), (2 + (-8) + (-240) + (-154)) * $self->{serial}->{'scale'}->{coefficient};
-			push @weights, 0, 0;
-		} else {
-			push @weights, $weight_platform1, $weight_platform2;
-		}
+		push @weights, $weight_platform1, $weight_platform2;
 
 		# remove 0 array variable
-		splice @weights, 0, 1;# if $zero != 1;
+		splice @weights, 0, 1;
 	};
 	if($@) { $self->{log}->save("e", "$@") };
 
 	$self->{log}->save('d', Dumper(@weights) ) if $self->{serial}->{'DEBUG'};
 	
-	if ( @weights ) {
-		return \@weights;
-	} else {
-		return undef;
-	}
+	return \@weights;
   }
 
   sub _read {
@@ -224,9 +193,11 @@ exit;
 		$readline = $self->net_read($REQUEST);
 	}
 
+	$readline = "" unless defined($readline);
+	
 	$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
 
-	return $readline || "";
+	return $readline;
   }
 
   sub clean {
@@ -300,7 +271,7 @@ exit;
 	}
 	$socket->close();
 
-	return $response || "";
+	return $response;
   }
 }
 1;
