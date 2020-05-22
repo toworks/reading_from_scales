@@ -48,7 +48,6 @@ package blanciai;{
 		# step 2: WghtT -> <netto> YP - вес нетто
 		my $_command = $command->{'netto'};
 		$ANSWER = $self->_read($_command);
-		#return if $self->get('error') == 1;
 		$calc_params{$_command} = &clean($ANSWER);
 		undef($ANSWER);
 
@@ -56,7 +55,6 @@ package blanciai;{
 		foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			my $_command = $command->{'cell'} . $scales->{$scale};
 			$ANSWER = $self->_read($_command);
-			#return if $self->get('error') == 1;
 			$calc_params{$scales->{$scale}}->{ $command->{'cell'}} = &clean($ANSWER);
 			undef($ANSWER);
 		}
@@ -66,7 +64,6 @@ package blanciai;{
 			foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 				$_command = $command->{'coefficient_angle'} . $scales->{$scale};
 				$ANSWER = $self->_read($_command);
-				#return if $self->get('error') == 1;
 				$ANSWER =~ /\s*([\d\.\,]+)\s*([\d\.\,]+)/; # get first value $1 - first  $2 - two
 				$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}} = &clean($1);
 				undef($ANSWER);
@@ -80,7 +77,8 @@ package blanciai;{
 							$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}};
 		}
 
-		if ( $zero eq 1 ) {
+		# not save cahe if bad data: 4376899435 
+		if ( $zero eq 1 and $calc_params{$scales->{1}}->{$command->{'cell'}} < 65535 ) {
 			my %cache;
 			# update cache
 			foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
@@ -120,7 +118,7 @@ package blanciai;{
 		}		
 
 
-		if ( $zero eq 0 ) {	
+#		if ( $zero eq 0 ) {	
 			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 				# step 9: ki = Ps/pi;
 				$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{'Ps'} /
@@ -135,7 +133,7 @@ package blanciai;{
 					$weight_platform1 += $weights[$scales->{$scale}] if ( $scales->{$scale} <= 4 );
 					$weight_platform2 += $weights[$scales->{$scale}] if ( $scales->{$scale} > 4 and $scales->{$scale} <= 8 );
 				}
-			}
+#			}
 		}
 		
 		print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
