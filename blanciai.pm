@@ -118,7 +118,7 @@ package blanciai;{
 		}		
 
 
-#		if ( $zero eq 0 ) {	
+#		if ( $zero eq 0 ) {
 			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 				# step 9: ki = Ps/pi;
 				$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{'Ps'} /
@@ -133,8 +133,8 @@ package blanciai;{
 					$weight_platform1 += $weights[$scales->{$scale}] if ( $scales->{$scale} <= 4 );
 					$weight_platform2 += $weights[$scales->{$scale}] if ( $scales->{$scale} > 4 and $scales->{$scale} <= 8 );
 				}
-#			}
-		}
+			}
+#		}
 		
 		print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
 		$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
