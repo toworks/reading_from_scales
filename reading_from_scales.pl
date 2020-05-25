@@ -14,6 +14,7 @@
  use lib ('libs', '.');
  use logging;
  use configuration;
+ use cache;
  use _sql;
 
 # my $DEBUG: shared;
@@ -22,17 +23,18 @@
  
  $| = 1;  # make unbuffered
 
+ my $VERSION = "0.1 (20200519)";
  my $log = LOG->new();
  my $conf = configuration->new($log);
 
- my $DEBUG = $conf->get('app')->{'debug'};
+ $log->save('i', "program version: ".$VERSION);
 
- $log->save('i', "start app");
+ my $DEBUG = $conf->get('app')->{'debug'};
 
  $SIG{'TERM'} = $SIG{'HUP'} = $SIG{'INT'} = sub {
                       local $SIG{'TERM'} = 'IGNORE';
 #						$log->save('d', "SIGNAL TERM | HUP | INT | $$");
-					  $log->save('i', "stop app");
+					  $log->save('i', "program stopped");
                       kill TERM => -$$;
  };
 
@@ -67,12 +69,15 @@
     $log->save('i', "start thread pid $id");
 	$log->save('i', "scale: ".$conf->{'type'});
 
+	my $cache = cache->new($log, $log->get_name().'.cache.yml');
+
 	my $connection_type = $conf->{'connection'};
 
 	my $reader = $scale_type->new($log);
 	$reader->set('DEBUG' => $DEBUG);
 	$reader->set('scale' => $conf->{'scale'});
 	$reader->set('measuring' => $conf->{'measuring'});
+	$reader->set('cache' => $cache);
 	if ( $connection_type =~ /serial/ ) {
 		$reader->set('comport' => $conf->{$connection_type}->{comport});
 		$reader->set('baud' => $conf->{$connection_type}->{baud});
