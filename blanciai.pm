@@ -78,7 +78,7 @@ package blanciai;{
 		}
 
 		# not save cahe if bad data: 4376899435 
-		if ( $zero eq 1 and $calc_params{$scales->{1}}->{$command->{'cell'}} < 65535 ) {
+		if ( $zero eq 1 and $calc_params{$scales->{1}}->{$command->{'cell'}} < 9999 ) {
 			my %cache;
 			# update cache
 			foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
