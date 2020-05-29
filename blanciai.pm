@@ -25,7 +25,7 @@ package blanciai;{
 		$self->{connection} = $self->{serial}->{connection};
 	}
 
-	my (@weights, $command, $scales, $weight_platform1, $weight_platform2);
+	my (@weights, $command, $scales, $weight_platform1, $weight_platform2, $BAD_DATA);
 	
 	# clean Ps
 	$calc_params{'Ps'} = 0;
@@ -76,9 +76,16 @@ package blanciai;{
 							$calc_params{$scales->{$scale}}->{$command->{'cell'}} *
 							$calc_params{$scales->{$scale}}->{$command->{'coefficient_angle'}};
 		}
-
+		
 		# not save cahe if bad data: 4376899435 
-		if ( $zero eq 1 and $calc_params{$scales->{1}}->{$command->{'cell'}} < 9999 ) {
+		foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+			if ( $calc_params{$scales->{$scale}}->{$command->{'cell'}} < 9999 ) {
+				$BAD_DATA = 1;
+				last;
+			}
+		}
+		
+		if ( $zero eq 1 and $BAD_DATA ne 1;) {
 			my %cache;
 			# update cache
 			foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
