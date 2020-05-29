@@ -81,6 +81,7 @@ package blanciai;{
 		foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			if ( $calc_params{$scales->{$scale}}->{$command->{'cell'}} < 9999 ) {
 				$BAD_DATA = 1;
+				$self->{log}->save('d', "BAD_DATA: DP". $scales->{$scale} .": ". $calc_params{$scales->{$scale}}->{$command->{'cell'}}) if $self->{serial}->{'DEBUG'};
 				last;
 			}
 		}
