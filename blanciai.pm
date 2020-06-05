@@ -86,7 +86,7 @@ package blanciai;{
 			}
 		}
 		
-		if ( $zero eq 1 and $BAD_DATA ne 1;) {
+		if ( $zero eq 1 and $BAD_DATA ne 1 ) {
 			my %cache;
 			# update cache
 			foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
