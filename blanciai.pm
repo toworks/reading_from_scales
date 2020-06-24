@@ -130,10 +130,12 @@ package blanciai;{
 			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 				# step 9: ki = Ps/pi;
 				$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{'Ps'} /
-														  $calc_params{$scales->{$scale}}->{'pi'};
+														  ( $calc_params{$scales->{$scale}}->{'pi'} ne 0 ?
+															$calc_params{$scales->{$scale}}->{'pi'} : 1 );
 				# step 10: wi = WghtT/ki
 				$calc_params{$scales->{$scale}}->{'wi'} = $calc_params{'YP'} /
-														  $calc_params{$scales->{$scale}}->{'ki'};
+														  ( $calc_params{$scales->{$scale}}->{'ki'} ne 0 ?
+															$calc_params{$scales->{$scale}}->{'ki'} : 1 );
 				if ( defined $calc_params{$scales->{$scale}}->{'wi'} ) {
 					# wi write to array for sql
 					$weights[$scales->{$scale}] = sprintf("%.0f", $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} );
