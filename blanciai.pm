@@ -16,6 +16,8 @@ package blanciai;{
   my $REQUEST;
   my $ANSWER;
   my %calc_params;
+  my $stab_count = 0;
+  my $old_weight = 0;
 
 
   sub read {
@@ -51,6 +53,17 @@ package blanciai;{
 		$calc_params{$_command} = &clean($ANSWER);
 		undef($ANSWER);
 
+		# check stable weight
+		if ( $calc_params{$_command} eq $old_weight ) {
+			$self->{serial}->{stab} = 1 if $stab_count >= 3;
+			$stab_count++;
+		} else {
+			$self->{serial}->{stab} = $stab_count = 0;
+		}
+		
+		# total weight from the device
+		push @weights, $calc_params{$_command};
+		
 		# step 3: <cell> DP - значение ячейки (points)
 		foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
 			my $_command = $command->{'cell'} . $scales->{$scale};
@@ -126,25 +139,23 @@ package blanciai;{
 		}		
 
 
-#		if ( $zero eq 0 ) {
-			foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
-				# step 9: ki = Ps/pi;
-				$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{'Ps'} /
-														  ( $calc_params{$scales->{$scale}}->{'pi'} ne 0 ?
-															$calc_params{$scales->{$scale}}->{'pi'} : 1 );
-				# step 10: wi = WghtT/ki
-				$calc_params{$scales->{$scale}}->{'wi'} = $calc_params{'YP'} /
-														  ( $calc_params{$scales->{$scale}}->{'ki'} ne 0 ?
-															$calc_params{$scales->{$scale}}->{'ki'} : 1 );
-				if ( defined $calc_params{$scales->{$scale}}->{'wi'} ) {
-					# wi write to array for sql
-					$weights[$scales->{$scale}] = sprintf("%.0f", $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} );
-					# weight platforms
-					$weight_platform1 += $weights[$scales->{$scale}] if ( $scales->{$scale} <= 4 );
-					$weight_platform2 += $weights[$scales->{$scale}] if ( $scales->{$scale} > 4 and $scales->{$scale} <= 8 );
-				}
+		foreach my $scale (sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
+			# step 9: ki = Ps/pi;
+			$calc_params{$scales->{$scale}}->{'ki'} = $calc_params{'Ps'} /
+													  ( $calc_params{$scales->{$scale}}->{'pi'} ne 0 ?
+														$calc_params{$scales->{$scale}}->{'pi'} : 1 );
+			# step 10: wi = WghtT/ki
+			$calc_params{$scales->{$scale}}->{'wi'} = $calc_params{'YP'} /
+													  ( $calc_params{$scales->{$scale}}->{'ki'} ne 0 ?
+														$calc_params{$scales->{$scale}}->{'ki'} : 1 );
+			if ( defined $calc_params{$scales->{$scale}}->{'wi'} ) {
+				# wi write to array for sql
+				$weights[$scales->{$scale}] = sprintf("%.0f", $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} );
+				# weight platforms
+				$weight_platform1 += $weights[$scales->{$scale}] if ( $scales->{$scale} <= 4 );
+				$weight_platform2 += $weights[$scales->{$scale}] if ( $scales->{$scale} > 4 and $scales->{$scale} <= 8 );
 			}
-#		}
+		}
 		
 		print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
 		$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
@@ -152,7 +163,7 @@ package blanciai;{
 		push @weights, $weight_platform1, $weight_platform2;
 
 		# remove 0 array variable
-		splice @weights, 0, 1;
+		#splice @weights, 0, 1;
 	};
 	if($@) { $self->{log}->save("e", "$@") };
 

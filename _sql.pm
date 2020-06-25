@@ -20,10 +20,10 @@ package _sql;{
 	}
 
 	if (ref $weight eq 'ARRAY') {
-		$query  = "INSERT [$self->{sql}->{database}]..$self->{sql}->{table} (ID_Scales, DT, WeightStabilized_1, ";
+		$query  = "INSERT [$self->{sql}->{database}]..$self->{sql}->{table} (ID_Scales, DT, Weight, WeightStabilized_1, ";
 		$query .= "load_sensor_1, load_sensor_2, load_sensor_3, load_sensor_4, ";
 		$query .= "load_sensor_5, load_sensor_6, load_sensor_7, load_sensor_8, Weight_platform_1, Weight_platform_2) ";
-		$query .= "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+		$query .= "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 	}
 
 	$weight = [$weight] if (ref $weight ne 'ARRAY');

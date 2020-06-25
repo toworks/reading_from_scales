@@ -101,9 +101,9 @@
 	$sql->set('table' => $conf->{'sql'}->{'table'});
 
 	while (1) {
-		
-		my $status = 1;
+
 		my $weight = $reader->read();
+		my $status = ( defined($reader->get('stab')) ? $reader->get('stab') : 1);
 
 		$log->save('i', $conf->{'measuring'}->{id_scale}. ", " .
 						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
