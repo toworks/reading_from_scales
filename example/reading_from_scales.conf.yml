@@ -6,7 +6,7 @@ scales:
         cycle: 1
         sql:
             type: mssql
-            driver: ODBC Driver 13 for SQL Server
+            driver: ODBC Driver 17 for SQL Server
             #host: KRR-SQL-PACLX02
             host: KRR-TST-PAHWL02
             database: KRR-PA-ISA95_PRODUCTION
