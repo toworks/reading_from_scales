@@ -107,17 +107,17 @@
 
 		$log->save('i', $conf->{'measuring'}->{id_scale}. ", " .
 						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
-						" $status = 1, $weight" ) if defined($weight) and (ref $weight ne 'ARRAY') and $DEBUG;
+						" status: $status, $weight" ) if defined($weight) and (ref $weight ne 'ARRAY') and $DEBUG;
 		$log->save('i', $conf->{'measuring'}->{id_scale}. ", " .
 						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
-						" $status = 1, weight: ". join(" | ", @{$weight}) )  if defined($weight) and (ref $weight eq 'ARRAY') and $DEBUG;
+						" status: $status, weight: ". join(" | ", @{$weight}) )  if defined($weight) and (ref $weight eq 'ARRAY') and $DEBUG;
 		print $conf->{'measuring'}->{id_scale}. ", " .
 						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
 
-						" $status = 1, $weight","\n" if defined($weight) and (ref $weight ne 'ARRAY') and $DEBUG;
+						" status: $status, $weight","\n" if defined($weight) and (ref $weight ne 'ARRAY') and $DEBUG;
 		print $conf->{'measuring'}->{id_scale}. ", " .
 						strftime("%Y-%m-%d %H:%M:%S", localtime time) .
-						" $status = 1, weight: ", join(" | ", @{$weight}), "\n" if defined($weight) and (ref $weight eq 'ARRAY') and $DEBUG;
+						" status: $status, weight: ", join(" | ", @{$weight}), "\n" if defined($weight) and (ref $weight eq 'ARRAY') and $DEBUG;
 
 		$sql->write_weight( ($conf->{'measuring'}->{id_scale}, strftime("%Y-%m-%d %H:%M:%S", localtime time), $status, $weight) ) if defined($weight);
 

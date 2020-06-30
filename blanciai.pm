@@ -58,6 +58,7 @@ package blanciai;{
 			$self->{serial}->{stab} = 1 if $stab_count >= 3;
 			$stab_count++;
 		} else {
+			$old_weight = $calc_params{$_command};
 			$self->{serial}->{stab} = $stab_count = 0;
 		}
 		
