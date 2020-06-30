@@ -62,7 +62,7 @@ package blanciai;{
 		}
 		
 		# total weight from the device
-		push @weights, $calc_params{$_command};
+		my $WEIGHT = $calc_params{$_command};
 		
 		# step 3: <cell> DP - значение ячейки (points)
 		foreach my $scale ( sort {$scales->{$a} <=> $scales->{$b}} keys %{$scales} ) {
@@ -160,10 +160,10 @@ package blanciai;{
 		print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
 		$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
 
-		push @weights, $weight_platform1, $weight_platform2;
+		push @weights, $weight_platform1, $weight_platform2, $WEIGHT;
 
 		# remove 0 array variable
-		#splice @weights, 0, 1;
+		splice @weights, 0, 1;
 	};
 	if($@) { $self->{log}->save("e", "$@") };
 
