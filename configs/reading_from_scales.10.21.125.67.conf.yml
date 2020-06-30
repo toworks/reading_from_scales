@@ -1,10 +1,10 @@
 
 scales:
-    koda:
+    blanciai:
         enabled: true
         connection: serial
-        type: КОДА-IV
-        cycle: 0.5
+        type: Blanciai D400
+        cycle: 1
         sql:
             type: mssql
             driver: ODBC Driver 17 for SQL Server
@@ -14,25 +14,28 @@ scales:
             table: KEP_Analytics_Weight
 
         serial:
-            comport: COM2
+            comport: COM4
             baud: 19200
-            parity: odd
+            parity: none
             databits: 8
             stopbits: 1
 
         network:
-            host: 10.27.230.37
+            host: 10.21.125.67
             port: 4001
             protocol: udp
 
         scale:
-            command: 
-            coefficient: 1000
+            command: {coefficient_angle: DC, status: XZ, netto: YP, cell: DP}
+            # {8: 1} 8 - датчик 1 - поле в базе (load_sensor_1)
+            #alias: {8: 1, 7: 2, 6: 3, 4: 4, 5: 5, 3: 6, 2: 7, 1: 8}
+            alias: {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8}
+            coefficient: 1
 
         measuring:
-            id_scale: 6065
+            id_scale: 5353
 
 app:
     cycle: 1
-    debug: false
+    debug: true
 
