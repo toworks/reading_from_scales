@@ -52,7 +52,7 @@ package blanciai;{
 		$ANSWER = $self->_read($_command);
 		$calc_params{$_command} = &clean($ANSWER);
 		undef($ANSWER);
-
+=comm
 		# check stable weight
 		if ( $calc_params{$_command} eq $old_weight ) {
 			$self->{serial}->{stab} = 1 if $stab_count >= 3;
@@ -61,7 +61,7 @@ package blanciai;{
 			$old_weight = $calc_params{$_command};
 			$self->{serial}->{stab} = $stab_count = 0;
 		}
-		
+=cut		
 		# total weight from the device
 		my $WEIGHT = $calc_params{$_command};
 		
@@ -149,17 +149,31 @@ package blanciai;{
 			$calc_params{$scales->{$scale}}->{'wi'} = $calc_params{'YP'} /
 													  ( $calc_params{$scales->{$scale}}->{'ki'} ne 0 ?
 														$calc_params{$scales->{$scale}}->{'ki'} : 1 );
-			if ( defined $calc_params{$scales->{$scale}}->{'wi'} ) {
+			#if ( defined $calc_params{$scales->{$scale}}->{'wi'} ) {
 				# wi write to array for sql
-				$weights[$scales->{$scale}] = sprintf("%.0f", $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} );
+				#$weights[$scales->{$scale}] = sprintf("%.0f", $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} );
+				$weights[$scales->{$scale}] = &round($calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} );
 				# weight platforms
 				$weight_platform1 += $weights[$scales->{$scale}] if ( $scales->{$scale} <= 4 );
 				$weight_platform2 += $weights[$scales->{$scale}] if ( $scales->{$scale} > 4 and $scales->{$scale} <= 8 );
-			}
+			#}
 		}
 		
-		print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
+		my $platform_weight = $weight_platform1 + $weight_platform2;
+
+		# check stable weight
+		if ( $platform_weight eq $old_weight ) {
+			$self->{serial}->{stab} = 1 if $stab_count >= 2;
+			$stab_count++;
+		} else {
+			$old_weight = $platform_weight;
+			$self->{serial}->{stab} = $stab_count = 0;
+		}
+
+		#print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
 		$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
+
+		print "weight device: ", $WEIGHT, "\tcalc: ", $platform_weight if $self->{serial}->{'DEBUG'};
 
 		push @weights, $weight_platform1, $weight_platform2, $WEIGHT;
 
@@ -242,6 +256,13 @@ package blanciai;{
 		$ret = $bin[6] if $type eq 'zero';
 	}
 	return $ret;
+  }
+
+  sub round {
+	my ($numeric) = @_;
+	my @array = split("", $numeric);
+	$array[$#array] = sprintf("%.0f", $array[$#array] * 0.1);
+	return( join("", @array) );
   }
 
   sub net_read {
