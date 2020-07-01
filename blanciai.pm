@@ -152,7 +152,7 @@ package blanciai;{
 			#if ( defined $calc_params{$scales->{$scale}}->{'wi'} ) {
 				# wi write to array for sql
 				#$weights[$scales->{$scale}] = sprintf("%.0f", $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} );
-				$weights[$scales->{$scale}] = &round($calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient} );
+				$weights[$scales->{$scale}] = $calc_params{$scales->{$scale}}->{'wi'} * $self->{serial}->{'scale'}->{coefficient};
 				# weight platforms
 				$weight_platform1 += $weights[$scales->{$scale}] if ( $scales->{$scale} <= 4 );
 				$weight_platform2 += $weights[$scales->{$scale}] if ( $scales->{$scale} > 4 and $scales->{$scale} <= 8 );
@@ -160,22 +160,27 @@ package blanciai;{
 		}
 		
 		my $platform_weight = $weight_platform1 + $weight_platform2;
+		my $weight_platform1_round = &round($weight_platform1);
+		my $weight_platform2_round = &round($weight_platform2);
+		my $platform_weight_round = $weight_platform1_round + $weight_platform2_round;
 
 		# check stable weight
-		if ( $platform_weight eq $old_weight ) {
+		if ( $platform_weight_round eq $old_weight ) {
 			$self->{serial}->{stab} = 1 if $stab_count >= 2;
 			$stab_count++;
 		} else {
-			$old_weight = $platform_weight;
+			$old_weight = $platform_weight_round;
 			$self->{serial}->{stab} = $stab_count = 0;
 		}
 
 		#print Dumper(\%calc_params) if $self->{serial}->{'DEBUG'};
 		$self->{log}->save('d', "calc_params: ". Dumper(\%calc_params)) if $self->{serial}->{'DEBUG'};
 
-		print "weight device: ", $WEIGHT, "\tcalc: ", $platform_weight if $self->{serial}->{'DEBUG'};
+		print "weight device: ", $WEIGHT,
+			  "\tcalc: ", $platform_weight,
+			  "\tround calc: ", $platform_weight_round if $self->{serial}->{'DEBUG'};
 
-		push @weights, $weight_platform1, $weight_platform2, $WEIGHT;
+		push @weights, $weight_platform1_round, $weight_platform2_round, $WEIGHT;
 
 		# remove 0 array variable
 		splice @weights, 0, 1;
@@ -260,9 +265,8 @@ package blanciai;{
 
   sub round {
 	my ($numeric) = @_;
-	my @array = split("", $numeric);
-	$array[$#array] = sprintf("%.0f", $array[$#array] * 0.1);
-	return( join("", @array) );
+	# округление до десятков
+	return sprintf("%.0f", $numeric/10)*10;
   }
 
   sub net_read {
