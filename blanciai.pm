@@ -31,6 +31,9 @@ package blanciai;{
 	
 	# clean Ps
 	$calc_params{'Ps'} = 0;
+	
+	# init
+	$BAD_DATA = 0;
 
 	eval {
 		$command = \%{$self->{serial}->{'scale'}->{'command'}};
@@ -156,6 +159,8 @@ package blanciai;{
 				# weight platforms
 				$weight_platform1 += $weights[$scales->{$scale}] if ( $scales->{$scale} <= 4 );
 				$weight_platform2 += $weights[$scales->{$scale}] if ( $scales->{$scale} > 4 and $scales->{$scale} <= 8 );
+				
+				$weights[$scales->{$scale}] = &round($weights[$scales->{$scale}]);
 			#}
 		}
 		
@@ -178,7 +183,8 @@ package blanciai;{
 
 		print "weight device: ", $WEIGHT,
 			  "\tcalc: ", $platform_weight,
-			  "\tround calc: ", $platform_weight_round if $self->{serial}->{'DEBUG'};
+			  "\tround calc: ", $platform_weight_round,
+			  "\n" if $self->{serial}->{'DEBUG'};
 
 		push @weights, $weight_platform1_round, $weight_platform2_round, $WEIGHT;
 
