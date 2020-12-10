@@ -18,6 +18,11 @@
     * информация: **Rukovodstvo_po_ekspluatacii_Bilanciai_D400.pdf**
     * контроллер: **[Bilanciai D400](http://www.koda.ua/download/Rukovodstvo_po_ekspluatacii_Bilanciai_D400.pdf)**
 
+5. весовые контроллеры **KELI** 
+    * протокол: ASCII
+    * информация: **T1-User-Manual.pdf**
+    * контроллер: **[XK3118T1](https://keli.com.ua/wp-content/uploads/2016/11/T1-User-Manual.pdf)**
+
 
 
 **WARNING**

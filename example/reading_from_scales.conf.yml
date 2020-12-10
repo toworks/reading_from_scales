@@ -43,7 +43,7 @@ scales:
         cycle: 0.5
         sql:
             type: mssql
-            driver: ODBC Driver 13 for SQL Server
+            driver: ODBC Driver 17 for SQL Server
             #host: KRR-SQL-PACLX02
             host: KRR-TST-PAHWL02
             database: KRR-PA-ISA95_PRODUCTION
@@ -75,7 +75,7 @@ scales:
         cycle: 0.5
         sql:
             type: mssql
-            driver: ODBC Driver 13 for SQL Server
+            driver: ODBC Driver 17 for SQL Server
             #host: KRR-SQL-PACLX02
             host: KRR-TST-PAHWL02
             database: KRR-PA-ISA95_PRODUCTION
@@ -107,7 +107,7 @@ scales:
         cycle: 0.5
         sql:
             type: mssql
-            driver: ODBC Driver 13 for SQL Server
+            driver: ODBC Driver 17 for SQL Server
             host: KRR-SQL-PACLX02
             #host: KRR-TST-PAHWL02
             database: KRR-PA-ISA95_PRODUCTION
@@ -139,7 +139,7 @@ scales:
         cycle: 1
         sql:
             type: mssql
-            driver: ODBC Driver 13 for SQL Server
+            driver: ODBC Driver 17 for SQL Server
             host: KRR-SQL-PACLX02
             #host: KRR-TST-PAHWL02
             database: KRR-PA-ISA95_PRODUCTION
@@ -161,6 +161,38 @@ scales:
             command: {coefficient_angle: DC, status: XZ, netto: YP, cell: DP}
             # {8: 1} 8 - датчик 1 - поле в базе (load_sensor_1)
             alias: {8: 1, 7: 2, 6: 3, 4: 4, 5: 5, 3: 6, 2: 7, 1: 8}
+            coefficient: 1000
+
+        measuring:
+            id_scale: 5353
+            
+    keli:
+        enabled: false
+        connection: serial
+        type: xk3118t1
+        cycle: 0.5
+        sql:
+            type: mssql
+            driver: ODBC Driver 17 for SQL Server
+            #host: KRR-SQL-PACLX02
+            host: KRR-TST-PAHWL02
+            database: KRR-PA-ISA95_PRODUCTION
+            table: KEP_Analytics_Weight
+
+        serial:
+            comport: COM1
+            baud: 9600
+            parity: none
+            databits: 8
+            stopbits: 1
+
+        network:
+            host: 10.27.232.50
+            port: 4001
+            protocol: udp
+
+        scale:
+            command: 
             coefficient: 1000
 
         measuring:
