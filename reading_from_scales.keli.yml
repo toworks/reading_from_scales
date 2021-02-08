@@ -1,0 +1,38 @@
+
+scales:
+    keli:
+        enabled: true
+        connection: serial
+        type: xk3118t1
+        cycle: 0.5
+        sql:
+            type: mssql
+            driver: ODBC Driver 17 for SQL Server
+            #host: KRR-SQL-PACLX02
+            host: KRR-TST-PAHWL02
+            database: KRR-PA-ISA95_PRODUCTION
+            table: KEP_Analytics_Weight
+
+        serial:
+            comport: COM1
+            baud: 9600
+            parity: none
+            databits: 8
+            stopbits: 1
+
+        network:
+            host: 10.27.232.62
+            port: 4001
+            protocol: udp
+
+        scale:
+            command: 
+            coefficient: 1000
+
+        measuring:
+            id_scale: 5353
+
+app:
+    cycle: 1
+    debug: true
+

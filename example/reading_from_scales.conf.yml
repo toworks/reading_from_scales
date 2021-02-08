@@ -187,7 +187,7 @@ scales:
             stopbits: 1
 
         network:
-            host: 10.27.232.50
+            host: 10.27.232.62
             port: 4001
             protocol: udp
 
