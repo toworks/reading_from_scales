@@ -8,8 +8,8 @@ scales:
         sql:
             type: mssql
             driver: ODBC Driver 17 for SQL Server
-            #host: KRR-SQL-PACLX02
-            host: KRR-TST-PAHWL02
+            host: KRR-SQL-PACLX02
+            #host: KRR-TST-PAHWL02
             database: KRR-PA-ISA95_PRODUCTION
             table: KEP_Analytics_Weight
 
@@ -30,7 +30,7 @@ scales:
             coefficient: 1
 
         measuring:
-            id_scale: 1511
+            id_scale: 1453
 
 app:
     cycle: 1
