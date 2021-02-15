@@ -180,7 +180,7 @@ scales:
             table: KEP_Analytics_Weight
 
         serial:
-            comport: COM1
+            comport: COM5
             baud: 9600
             parity: none
             databits: 8
@@ -192,8 +192,8 @@ scales:
             protocol: udp
 
         scale:
-            command: 
-            coefficient: 1000
+            command: A
+            coefficient: 1
 
         measuring:
             id_scale: 5353

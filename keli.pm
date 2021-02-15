@@ -10,8 +10,9 @@ package keli;{
 #	информация: none
 #	контроллер: XK3118T1
 
-  my $STX = 'cc';
-  my $ETX = 'c3';
+  my $STX = pack "c1", 0x02;
+  my $ETX = pack "c1", 0x03;
+  my $REQUEST;
 
   sub read {
 	my ($self) = @_;
@@ -20,9 +21,13 @@ package keli;{
 		$self->{connection} = $self->{serial}->{connection};
 	}
 
-	$self->{log}->save('d', "connection type: " . $self->{connection} ) if $self->{serial}->{'DEBUG'};
-	$self->{log}->save('d', "type connection: $self->{serial}->{connection}") if $self->{serial}->{'DEBUG'};
+	$REQUEST = $STX . $self->{serial}->{'scale'}->{command} . $ETX;
 
+	$self->{log}->save('d', "connection type: " . $self->{connection} ) if $self->get('DEBUG');
+	$self->{log}->save('d', "type connection: $self->{serial}->{connection}") if $self->get('DEBUG');
+
+	$self->{log}->save('d', "request: $REQUEST") if $self->get('DEBUG');
+	
 	my ($count, $readline, $msg);
 
 	if ( $self->{connection} =~ /serial/ ) {
@@ -33,68 +38,35 @@ package keli;{
 		#eval{ $readline = $self->{fh}->input || die "$!"; };
 		#if($@) { $self->{log}->save("e", "$@") };
 
-#		eval{ $readline = $self->{fh}->write($REQUEST) || die "$!"; };
-#		if($@) { $self->{log}->save("e", "$@") };
-
-#		$self->{log}->save('d', "request count: $readline") if $self->{serial}->{'DEBUG'};
-		eval{ 
-				my $s = 0;
-				my $c = 0;
-				while ($c == 0) {
-					$readline = $self->{fh}->read(255) || die "$!";
-					my @bytes = map { unpack('H*', $_) } ($readline =~ /(.)/g);
-					foreach my $_hex (@bytes) {
-						if ( ($_hex =~ /$STX/ and $s == 0) or $s == 1 ) {
-							$msg .= $_hex;
-							$s = 1;
-						}
-						if ( $_hex =~ /$ETX/ and $s == 1 ) {
-							$s = 0;
-							$c = 1;
-							$readline = $msg;
-							last;
-						}
-					}
-				}
-		};
+		eval{ $readline = $self->{fh}->write($REQUEST) || die "$!"; };
 		if($@) { $self->{log}->save("e", "$@") };
+
+		$self->{log}->save('d', "request count: $readline") if $self->get('DEBUG');
+		eval{ $readline = $self->{fh}->read(255) || die "$!"; };
+		if($@) { $self->{log}->save("e", "$@") };
+		$self->{log}->save('d', "answer: $readline") if $self->get('DEBUG');
 	} else {
 		$readline = $self->net_read();
 	}
 
-	$self->{log}->save('d', "answer: $readline") if $self->{serial}->{'DEBUG'};
+	$self->{log}->save('d', "answer: $readline") if $self->get('DEBUG');
 
 	return $self->processing($readline);
   }
 
   sub processing {
 	my ($self, $raw) = @_;
-	my @weight;
+	my $weight;
 
-	#my @_raw = map {  sprintf("%d", hex($_)) } ($raw =~ /(.)/g);
-	my @_raw = map {  sprintf("%b", hex($_)) } ($raw =~ /(.)/g);
+	$raw =~ s/^(.*:)(.*)(\(.*)$/$2/; # get weight
 
-	#$self->{log}->save('d', "processing raw decimal: " . join(" | ", @_raw) ) if $self->{serial}->{'DEBUG'};
-	$self->{log}->save('d', "processing raw bin: " . join(" | ", @_raw) ) if $self->{serial}->{'DEBUG'};
+	$weight = $raw;
 
-	my $const = 512;
-	push @weight, $_raw[2]  * $const + $_raw[3] * 4 + (($_raw[18] >> 5) & 3);
-	push @weight, $_raw[4]  * $const + $_raw[5] * 4 + (($_raw[18] >> 3) & 3);
-	push @weight, $_raw[6]  * $const + $_raw[7] * 4 + (($_raw[18] >> 1) & 3);
-	push @weight, $_raw[8]  * $const + $_raw[9] * 4 + (($_raw[18] >> 1) & 2) + (($_raw[19] >> 6) & 1);
-	push @weight, $_raw[10] * $const + $_raw[11] * 4 + (($_raw[19] >> 4) & 3);
-	push @weight, $_raw[12] * $const + $_raw[13] * 4 + (($_raw[19] >> 2) & 3);
-	push @weight, $_raw[14] * $const + $_raw[15] * 4 + ($_raw[19] & 3);
-	push @weight, $_raw[16] * $const + $_raw[17] * 4 + (($_raw[20] >> 5) & 3);
-
-	my $weight_platform1 =
-	my $weight_platform2 =
+	$weight = $weight * $self->get('scale')->{coefficient} if defined($self->get('scale')->{coefficient});
 	
-	push @weight, $weight_platform1, $weight_platform2;
-	
-	$self->{log}->save('d', "processing weight: " . Dumper(@weight) ) if $self->{serial}->{'DEBUG'};
+	$self->{log}->save('d', "processing weight: " . $weight ) if $self->get('DEBUG');
 
-	return \@weight;
+	return $weight;
   }
 
   sub net_read {
