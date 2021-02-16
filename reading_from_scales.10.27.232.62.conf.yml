@@ -34,5 +34,5 @@ scales:
 
 app:
     cycle: 1
-    debug: true
+    debug: false
 
