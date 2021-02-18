@@ -42,7 +42,8 @@ package keli;{
 		if($@) { $self->{log}->save("e", "$@") };
 
 		$self->{log}->save('d', "request count: $readline") if $self->get('DEBUG');
-		eval{ $readline = $self->{fh}->read(255) || die "$!"; };
+#		eval{ $readline = $self->{fh}->read(255) || die "$!"; };
+		eval{ $readline = $self->{fh}->read(255); };
 		if($@) { $self->{log}->save("e", "$@") };
 		$self->{log}->save('d', "answer: $readline") if $self->get('DEBUG');
 	} else {
