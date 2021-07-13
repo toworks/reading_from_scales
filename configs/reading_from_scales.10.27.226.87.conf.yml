@@ -1,0 +1,43 @@
+
+scales:
+    schenck:
+        enabled: true
+        connection: network
+        type: disomat b plus
+        cycle: 1
+        sql:
+            type: mssql
+            driver: ODBC Driver 17 for SQL Server
+            host: KRR-SQL-PACLX02
+            #host: KRR-TST-PAHWL02
+            database: KRR-PA-ISA95_PRODUCTION
+            table: KEP_Analytics_Weight
+
+        serial:
+            comport: COM4
+            baud: 9600
+            parity: even
+            databits: 8
+            stopbits: 1
+
+        network:
+            host: 10.27.226.87
+            port: 4001
+            protocol: udp
+
+        scale:
+            id: 00
+            command: TG
+            coefficient: 1000
+
+        measuring:
+            id_scale: 5112
+            in:
+                weight:
+                        bit: 1
+            out:
+
+app:
+    cycle: 1
+    debug: false
+
