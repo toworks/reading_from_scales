@@ -4,13 +4,13 @@ CLS
 set NSSM=C:\bin\language\perl\perl\bin\nssm_64.exe
 set SERVICE_NAME=reading_from_scales.10.27.232.62
 set APP_PATH=C:\bin\language\perl32\perl\bin\perl.exe
-rem set APP_DIR=C:\bin\daemon\%SERVICE_NAME%
 set APP_DIR=C:\bin\daemon\reading_from_scales
 set APP_PARAMETERS="%SERVICE_NAME%.pl"
 set APP_DISPLAYNAME="ArcelorMittal.%SERVICE_NAME%"
-set APP_DESCRIPTION="read data from all scales"
+set APP_DESCRIPTION="read data from 10.27.226.87"
 set APP_ROTATEBYTES=26214400
-set APP_ENVIRONMENTEXTRA="PATH=C:\bin\language\perl\c\bin;%PATH%"
+set APP_ENVIRONMENTEXTRA="PATH=C:\bin\language\perl\c\bin;C:\bin\oracle\instantclient_19_10;%PATH%"
+set APP_ENVIRONMENTEXTRA_2="ORACLE_HOME=C:\bin\oracle\instantclient_19_10"
 
 
 :menu
