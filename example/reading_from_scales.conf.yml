@@ -9,7 +9,7 @@ scales:
             driver: ODBC Driver 17 for SQL Server
             #host: KRR-SQL-PACLX02
             host: KRR-TST-PAHWL02
-            database: KRR-PA-ISA95_PRODUCTION
+            database: KRR-PA-UNIFIED_WEIGHT_SYSTEM
             table: KEP_Analytics_Weight
 
         serial:
