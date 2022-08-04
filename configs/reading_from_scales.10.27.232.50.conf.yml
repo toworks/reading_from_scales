@@ -31,7 +31,7 @@ scales:
             coefficient: 1000
 
         measuring:
-            id_scale: 1510
+            id_scale: 450
             in:
                 weight:
                         bit: 1

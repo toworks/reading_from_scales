@@ -33,7 +33,7 @@ scales:
             coefficient: 1
 
         measuring:
-            id_scale: 5353
+            id_scale: 888
 
 app:
     cycle: 1

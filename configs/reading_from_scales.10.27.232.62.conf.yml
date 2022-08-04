@@ -30,7 +30,7 @@ scales:
             coefficient: 1
 
         measuring:
-            id_scale: 1453
+            id_scale: 1257
 
 app:
     cycle: 1
