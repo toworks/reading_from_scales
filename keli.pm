@@ -59,7 +59,8 @@ package keli;{
 	my ($self, $raw) = @_;
 	my $weight;
 
-	$raw =~ s/^(.*:)(.*)(\(.*)$/$2/; # get weight
+	# 2 format: GW:0023,45(kg) | =0023,45(kg)
+	$raw =~ s/^(.*[:=])(.*)(\(.*)$/$2/; # get weight
 
 	$weight = $raw;
 
@@ -102,10 +103,12 @@ package keli;{
 		print "sent data of length $size\n" if $self->{serial}->{'DEBUG'};
 	};
 	if($@) { $self->{log}->save("e", "$@") };
-	
+
 	# notify server that request has been sent
-	shutdown($socket, 1);
-	
+	if( defined($self->get('scale')->{command}) || length($self->get('scale')->{command}) ) {
+		shutdown($socket, 1);
+	}
+
 	use IO::Select;
 
 	my $select = new IO::Select();
