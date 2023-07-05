@@ -23,8 +23,13 @@
     * информация: **T1-User-Manual.pdf**
     * контроллер: **[XK3118T1](https://keli.com.ua/wp-content/uploads/2016/11/T1-User-Manual.pdf)**
 
+6. весовые контроллеры **20ВА-Д** 
+    * протокол: ASCII
+    * информация: **none**
+    * контроллер: **[20ВА-Д-2-1 WWS](https://)**
+
 
 
 **WARNING**
-	На всех windows x64 при работе с последовательным портом [ошибка](https://rt.cpan.org/Public/Bug/Display.html?id=113337) (данное исправление неисправляет ошибку) открытия порта.
-	использовать нужно x32 strawberry-perl
+    На всех windows x64 при работе с последовательным портом [ошибка](https://rt.cpan.org/Public/Bug/Display.html?id=113337) (данное исправление неисправляет ошибку) открытия порта.
+    использовать нужно x32 strawberry-perl
