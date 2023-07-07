@@ -45,7 +45,7 @@ package va_d;{
             eval{ $readline = $self->{fh}->write($REQUEST) || die "$!"; };
             if($@) { $self->{log}->save("e", "$@") };
         }
-
+# serial port no code to work
 #       $self->{log}->save('d', "request count: $readline") if $self->get('DEBUG');
         eval{ 
                 my $s = 0;
@@ -67,6 +67,7 @@ package va_d;{
                     }
                 }
         };
+# serial port no code to work
         if($@) { $self->{log}->save("e", "$@") };
     } else {
         $readline = $self->net_read();
