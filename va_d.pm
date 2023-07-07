@@ -13,6 +13,8 @@ package va_d;{
   my $STX = pack "c1", 0x02;
   my $ETX = pack "c1", 0x03;
   my $REQUEST;
+  my $BUFFER_WEIGHT = 0;
+  my $BUFFER_NEXT_TIMESTAMP = 0;
 
   sub read {
     my ($self) = @_;
@@ -69,25 +71,45 @@ package va_d;{
     } else {
         $readline = $self->net_read();
     }
-####
-$readline = '2397;05/07/23;14:48:39;       1;��8855��;;��� "������";;��� "����";;���� ��������;;     240;²��  1             70kg;²��  2            170kg;;;;;;;;;;;;;:;;;;';
-####
+
     $self->{log}->save('d', "answer: $readline") if $self->get('DEBUG');
 
-    return $self->processing($readline);
+    my $weight = $self->processing($readline);
+
+    $self->{log}->save('d', "last buffer nex timestsmp: " . $BUFFER_NEXT_TIMESTAMP . "  buffer weight: " . $BUFFER_WEIGHT . "  weight: " . $weight) if $self->get('DEBUG');
+    print '>> current timestamp: ', time, "  next timestamp: ", $BUFFER_NEXT_TIMESTAMP, "  buffer weight: ", $BUFFER_WEIGHT, "  weight: ", $weight, "\n" if $self->get('DEBUG');
+
+    if ( $weight ne 0 and time gt $BUFFER_NEXT_TIMESTAMP ) {
+            $BUFFER_NEXT_TIMESTAMP = time + $self->get('scale')->{weight_memory_time};
+            $BUFFER_WEIGHT = $weight;
+    } else {
+            $BUFFER_WEIGHT = 0 if ( $weight eq 0 and time gt $BUFFER_NEXT_TIMESTAMP );
+            $weight = $BUFFER_WEIGHT;
+    }
+
+    $self->{log}->save('d', "new buffer nex timestsmp: " . $BUFFER_NEXT_TIMESTAMP . "  buffer weight: " . $BUFFER_WEIGHT . "  weight: " . $weight) if $self->get('DEBUG');
+    print '<< current timestamp: ', time, "  next timestamp: ", $BUFFER_NEXT_TIMESTAMP, "  buffer weight: ", $BUFFER_WEIGHT, "  weight: ", $weight, "\n" if $self->get('DEBUG');
+
+    return $weight || undef;
   }
 
   sub processing {
     my ($self, $raw) = @_;
-    my $weight;
+    my ($weight, $weight_position);
+
+    if ( defined $self->get('scale')->{weight_position} ) {
+        $weight_position = $self->get('scale')->{weight_position};
+    } else {
+        $weight_position = 0;
+    }
 
     # message: 2397;05/07/23;14:48:39;       1;��8855��;;��� "������";;��� "����";;���� ��������;;     240;²��  1             70kg;²��  2            170kg;;;;;;;;;;;;;:;;;;
     # get weight
     my @raw_array = split(/;/, $raw);
-    @raw_array[12] =~ s/\s+//g;
-    print Dumper(@raw_array);
+    @raw_array[$weight_position] =~ s/\s+//g;
+    print Dumper(@raw_array) if $self->get('DEBUG');
 
-    $weight = @raw_array[12];
+    $weight = @raw_array[$weight_position];
 
     $weight = $weight * $self->get('scale')->{coefficient} if defined($self->get('scale')->{coefficient});
     
