@@ -91,7 +91,7 @@ package va_d;{
     $self->{log}->save('d', "new buffer nex timestsmp: " . $BUFFER_NEXT_TIMESTAMP . "  buffer weight: " . $BUFFER_WEIGHT . "  weight: " . $weight) if $self->get('DEBUG');
     print '<< current timestamp: ', time, "  next timestamp: ", $BUFFER_NEXT_TIMESTAMP, "  buffer weight: ", $BUFFER_WEIGHT, "  weight: ", $weight, "\n" if $self->get('DEBUG');
 
-    return $weight || undef;
+    return $weight;
   }
 
   sub processing {
