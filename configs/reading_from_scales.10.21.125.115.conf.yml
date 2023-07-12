@@ -4,7 +4,7 @@ scales:
         enabled: true
         connection: network
         type: 20va-d-2-1_wws
-        cycle: 0.5
+        cycle: 0.2
         sql:
             type: mssql
             driver: ODBC Driver 17 for SQL Server
@@ -35,6 +35,6 @@ scales:
             id_scale: 1569
 
 app:
-    cycle: 1
+    cycle: 0.2
     debug: false
 
