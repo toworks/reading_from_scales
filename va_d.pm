@@ -107,7 +107,7 @@ package va_d;{
     # message: 2397;05/07/23;14:48:39;       1;��8855��;;��� "������";;��� "����";;���� ��������;;     240;²��  1             70kg;²��  2            170kg;;;;;;;;;;;;;:;;;;
     # get weight
     my @raw_array = split(/;/, $raw);
-    @raw_array[$weight_position] =~ s/\s+//g;
+    @raw_array[$weight_position] =~ s/\s+//g if defined @raw_array[$weight_position];
     print Dumper(@raw_array) if $self->get('DEBUG');
 
     $weight = @raw_array[$weight_position];
