@@ -71,10 +71,12 @@ sub sender () {
         eval {
             ${$socket}->send($count[$client_id] . $message) or die "$!";
             print($count[$client_id] . $message . "\n") or die "$!";
+            select undef, undef, undef, 2;
+            ${$socket}->send($count[$client_id] . ';;;;;;;;;;;;;;;;;;;') or die "$!";
         };
         print $@, "\n" if $@;
         $count[$client_id]++;
-        select undef, undef, undef, 1;
+        select undef, undef, undef, 10;
     }
 }
 
