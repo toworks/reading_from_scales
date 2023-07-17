@@ -5,6 +5,7 @@ package va_d;{
   use lib 'libs';
   use parent "serial";
   use Data::Dumper;
+  use constant BUFSIZE => 1024;
 
 #   протокол: ASCII
 #   информация: none
@@ -15,6 +16,8 @@ package va_d;{
   my $REQUEST;
   my $BUFFER_WEIGHT = 0;
   my $BUFFER_NEXT_TIMESTAMP = 0;
+  my $socket;
+  my $select;
 
   sub read {
     my ($self) = @_;
@@ -46,6 +49,7 @@ package va_d;{
             if($@) { $self->{log}->save("e", "$@") };
         }
 # serial port no code to work
+
 #       $self->{log}->save('d', "request count: $readline") if $self->get('DEBUG');
         eval{ 
                 my $s = 0;
@@ -67,7 +71,6 @@ package va_d;{
                     }
                 }
         };
-# serial port no code to work
         if($@) { $self->{log}->save("e", "$@") };
     } else {
         $readline = $self->net_read();
@@ -77,14 +80,14 @@ package va_d;{
 
     my $weight = $self->processing($readline);
 
-    $self->{log}->save('d', "last buffer nex timestsmp: " . $BUFFER_NEXT_TIMESTAMP . "  buffer weight: " . $BUFFER_WEIGHT . "  weight: " . $weight) if $self->get('DEBUG');
+    $self->{log}->save('d', "last buffer next timestsmp: " . $BUFFER_NEXT_TIMESTAMP . "  buffer weight: " . $BUFFER_WEIGHT . "  weight: " . $weight) if $self->get('DEBUG');
     print '>> current timestamp: ', time, "  next timestamp: ", $BUFFER_NEXT_TIMESTAMP, "  buffer weight: ", $BUFFER_WEIGHT, "  weight: ", $weight, "\n" if $self->get('DEBUG');
 
-    if ( $weight ne 0 and time gt $BUFFER_NEXT_TIMESTAMP ) {
+    if ( defined($weight) and $weight ne 0 and time gt $BUFFER_NEXT_TIMESTAMP ) {
             $BUFFER_NEXT_TIMESTAMP = time + $self->get('scale')->{weight_memory_time};
             $BUFFER_WEIGHT = $weight;
     } else {
-            $BUFFER_WEIGHT = 0 if ( $weight eq 0 and time gt $BUFFER_NEXT_TIMESTAMP );
+            $BUFFER_WEIGHT = 0 if ( (!defined($weight) or $weight eq 0) and time gt $BUFFER_NEXT_TIMESTAMP );
             $weight = $BUFFER_WEIGHT;
     }
 
@@ -107,10 +110,10 @@ package va_d;{
     # message: 2397;05/07/23;14:48:39;       1;��8855��;;��� "������";;��� "����";;���� ��������;;     240;²��  1             70kg;²��  2            170kg;;;;;;;;;;;;;:;;;;
     # get weight
     my @raw_array = split(/;/, $raw);
-    @raw_array[$weight_position] =~ s/\s+//g if defined(@raw_array[$weight_position]);
+    @raw_array[$weight_position] =~ s/\s+//g if defined(@raw_array[$weight_position]) and @raw_array[1] =~ /[0-9]+\/[0-9]+\/[0-9]+/;
     print Dumper(@raw_array) if $self->get('DEBUG');
 
-    $weight = @raw_array[$weight_position];
+    $weight = @raw_array[$weight_position] if defined(@raw_array[$weight_position]) and @raw_array[1] =~ /[0-9]+\/[0-9]+\/[0-9]+/;
 
     $weight = $weight * $self->get('scale')->{coefficient} if defined($self->get('scale')->{coefficient}) and defined($weight);
     
@@ -130,16 +133,22 @@ package va_d;{
                             " port: ".$self->{serial}->{port}.
                             " protocol: ".$self->{serial}->{protocol}) if $self->{serial}->{'DEBUG'};
 
-    my ($socket, $response);
+    my (@socket, $response);
 
     eval {
-        $socket = new IO::Socket::INET (
-        PeerHost   => $self->{serial}->{host},
-        PeerPort   => $self->{serial}->{port},
-        Proto      => $self->{serial}->{protocol},
-        Timeout    => 5,
-#       Blocking => 0,
-        ) || die "$!";
+        unless (defined($socket)) {
+            $socket = new IO::Socket::INET (
+            PeerHost   => $self->{serial}->{host},
+            PeerPort   => $self->{serial}->{port},
+            Proto      => $self->{serial}->{protocol},
+            Timeout    => 5,
+#           Blocking => 0,
+            ) || die "$!";
+
+            use IO::Select;
+            $select = new IO::Select() || die "$!";
+            $select->add($socket) || die "$!";
+       };
     };
     if($@) {
         $self->{log}->save("e", "$@"); 
@@ -147,28 +156,36 @@ package va_d;{
     };
 
     eval {
-        my $size = $socket->send($message);
-        print "sent data of length $size\n" if $self->{serial}->{'DEBUG'};
+        @socket = $select->can_read(1);
     };
-    if($@) { $self->{log}->save("e", "$@") };
+    if($@) {
+        $self->{log}->save("e", "$@"); 
+        eval { $socket->close(); };
+        undef $socket;
+        return;
+    };
 
-    # notify server that request has been sent
-    if( defined($self->get('scale')->{command}) || length($self->get('scale')->{command}) ) {
-        shutdown($socket, 1);
+    for my $handle (@socket) {
+        print STDERR "SOCKET handle ready\n" if $self->{serial}->{'DEBUG'};
+        if ( sysread($handle, $response, BUFSIZE) gt 0 ) {
+                ##syswrite (STDOUT, $buffer);
+                $self->{log}->save('d', "raw: ". $response) if $self->{serial}->{'DEBUG'};
+                print  "response: ", $response, "\n" if $self->{serial}->{'DEBUG'};
+        } else {
+                warn "connection closed by foreign host\n";
+                $self->{log}->save('i', "connection closed by foreign host: ". 
+                                            $self->{serial}->{protocol} . "//:".
+                                            $self->{serial}->{host} . ":".
+                                            $self->{serial}->{port});
+                $self->set('error' => 1);
+                eval { $socket->close(); };
+                undef $select;
+                return;
+        }
     }
-
-    use IO::Select;
-
-    my $select = new IO::Select();
-    $select->add($socket);
-    my @socket = $select->can_read(1);
-    if (@socket == 1) {
-        $socket->recv($response, 1024);
-        print "received response: $response\n" if $self->{serial}->{'DEBUG'};
-    }
-    $socket->close();
 
     return $response || "";
+
   }
 }
 1;
