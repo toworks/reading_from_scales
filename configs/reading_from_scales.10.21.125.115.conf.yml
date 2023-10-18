@@ -28,7 +28,7 @@ scales:
         scale:
             command: 
             coefficient: 1
-            weight_position: 12
+            weight_position: 7
             weight_memory_time: 60
 
         measuring:

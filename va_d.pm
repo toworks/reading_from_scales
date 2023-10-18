@@ -107,7 +107,10 @@ package va_d;{
         $weight_position = 0;
     }
 
+    # position 12
     # message: 2397;05/07/23;14:48:39;       1;��8855��;;��� "������";;��� "����";;���� ��������;;     240;²��  1             70kg;²��  2            170kg;;;;;;;;;;;;;:;;;;
+    # position 7
+    # message: 3123;17/10/23;15:13;       5;ÊÀ3694ÑÕ;;       2;   51500;    8610;   10570;   16730;   15590;;;;;;;;;;;
     # get weight
     my @raw_array = split(/;/, $raw);
     @raw_array[$weight_position] =~ s/\s+//g if defined(@raw_array[$weight_position]) and @raw_array[1] =~ /[0-9]+\/[0-9]+\/[0-9]+/;
