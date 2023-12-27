@@ -2,9 +2,9 @@
 scales:
     keli:
         enabled: true
-        connection: serial
+        connection: network
         type: xk3118t1
-        cycle: 0.5
+        cycle: 0.2
         sql:
             type: mssql
             driver: ODBC Driver 17 for SQL Server
@@ -23,10 +23,10 @@ scales:
         network:
             host: 10.27.232.62
             port: 4001
-            protocol: udp
+            protocol: tcp
 
         scale:
-            command: A
+#            command: A
             coefficient: 1
 
         measuring:
