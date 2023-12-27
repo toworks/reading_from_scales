@@ -5,6 +5,7 @@ package keli;{
   use lib 'libs';
   use parent "serial";
   use Data::Dumper;
+  use constant BUFSIZE => 1024;
 
 #	протокол: ASCII
 #	информация: none
@@ -13,6 +14,8 @@ package keli;{
   my $STX = pack "c1", 0x02;
   my $ETX = pack "c1", 0x03;
   my $REQUEST;
+  my $socket;
+  my $select;
 
   sub read {
 	my ($self) = @_;
@@ -57,7 +60,13 @@ package keli;{
 
   sub processing {
 	my ($self, $raw) = @_;
-	my $weight;
+	my ($weight, @raw_array);
+
+	@raw_array = split(/\r\n/, $raw);
+
+	if ($#raw_array >= 0 ) {
+		$raw = $raw_array[0];
+	}
 
 	# 2 format: GW:0023,45(kg) | =0023,45(kg)
 	$raw =~ s/^(.*[:=])(.*)(\(.*)$/$2/; # get weight
@@ -82,21 +91,27 @@ package keli;{
 							" port: ".$self->{serial}->{port}.
 							" protocol: ".$self->{serial}->{protocol}) if $self->{serial}->{'DEBUG'};
 
-	my ($socket, $response);
+	my (@socket, $response);
 
-	eval {
-		$socket = new IO::Socket::INET (
-		PeerHost   => $self->{serial}->{host},
-		PeerPort   => $self->{serial}->{port},
-		Proto      => $self->{serial}->{protocol},
-		Timeout    => 5,
-#		Blocking => 0,
-		) || die "$!";
-	};
-	if($@) {
-		$self->{log}->save("e", "$@"); 
-		return;
-	};
+    eval {
+        unless (defined($socket)) {
+            $socket = new IO::Socket::INET (
+            PeerHost   => $self->{serial}->{host},
+            PeerPort   => $self->{serial}->{port},
+            Proto      => $self->{serial}->{protocol},
+            Timeout    => 5,
+#           Blocking => 0,
+            ) || die "$!";
+
+            use IO::Select;
+            $select = new IO::Select() || die "$!";
+            $select->add($socket) || die "$!";
+       };
+    };
+    if($@) {
+        $self->{log}->save("e", "$@"); 
+        return;
+    };
 
 	eval {
 		my $size = $socket->send($message);
@@ -109,18 +124,36 @@ package keli;{
 		shutdown($socket, 1);
 	}
 
-	use IO::Select;
+    eval {
+        @socket = $select->can_read(1);
+    };
+    if($@) {
+        $self->{log}->save("e", "$@"); 
+        eval { $socket->close(); };
+        undef $socket;
+        return;
+    };
 
-	my $select = new IO::Select();
-	$select->add($socket);
-	my @socket = $select->can_read(1);
-	if (@socket == 1) {
-		$socket->recv($response, 1024);
-		print "received response: $response\n" if $self->{serial}->{'DEBUG'};
-	}
-	$socket->close();
+    for my $handle (@socket) {
+        print STDERR "SOCKET handle ready\n" if $self->{serial}->{'DEBUG'};
+        if ( sysread($handle, $response, BUFSIZE) gt 0 ) {
+                ##syswrite (STDOUT, $buffer);
+                $self->{log}->save('d', "raw: ". $response) if $self->{serial}->{'DEBUG'};
+                print  "response: ", $response, "\n" if $self->{serial}->{'DEBUG'};
+        } else {
+                warn "connection closed by foreign host\n";
+                $self->{log}->save('i', "connection closed by foreign host: ". 
+                                            $self->{serial}->{protocol} . "//:".
+                                            $self->{serial}->{host} . ":".
+                                            $self->{serial}->{port});
+                $self->set('error' => 1);
+                eval { $socket->close(); };
+                undef $select;
+                return;
+        }
+    }
 
-	return $response || "";
+    return $response || "";
   }
 }
 1;
