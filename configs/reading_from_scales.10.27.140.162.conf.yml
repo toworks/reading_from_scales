@@ -32,7 +32,7 @@ scales:
             weight_memory_time: 60
 
         measuring:
-            id_scale: 1554
+            id_scale: 1612
 
 app:
     cycle: 0.2
