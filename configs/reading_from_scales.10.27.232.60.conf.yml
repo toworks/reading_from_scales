@@ -1,0 +1,40 @@
+
+scales:
+    va_d:
+        enabled: true
+        connection: network
+        type: 20va-d-2-1_wws
+        cycle: 0.2
+        sql:
+            type: mssql
+            driver: ODBC Driver 17 for SQL Server
+            host: KRR-SQL-PACLX03
+            #host: KRR-TST-PAHWL02
+            database: KRR-PA-UNIFIED_WEIGHT_SYSTEM
+            table: KEP_Analytics_Weight
+
+        serial:
+            comport: COM5
+            baud: 9600
+            parity: none
+            databits: 8
+            stopbits: 1
+
+        network:
+            host: 10.27.232.60
+            port: 4001
+            protocol: tcp
+
+        scale:
+            command: 
+            coefficient: 1
+            weight_position: 7
+            weight_memory_time: 60
+
+        measuring:
+            id_scale: 1612
+
+app:
+    cycle: 0.2
+    debug: false
+
