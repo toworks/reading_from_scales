@@ -21,7 +21,7 @@ scales:
             stopbits: 1
 
         network:
-            host: 10.27.225.138
+            host: 10.27.229.194
             port: 4001
             protocol: tcp
 
