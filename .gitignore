@@ -1,0 +1,8 @@
+.vscode
+*.exe
+reading_scales
+data/*
+deploy/*
+/*.yml
+*.sdb*
+*.log
