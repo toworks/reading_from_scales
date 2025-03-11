@@ -1,5 +1,5 @@
 # Имя программы, может передаваться из переменной
-BUILD_NAME ?= reading_scales
+BUILD_NAME ?= reading_from_scales
 # Директория для развертывания
 DEST_DIR := deploy/
 # Получение текущего коммита git
