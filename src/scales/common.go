@@ -47,7 +47,11 @@ func (c *Config) Run() {
   go func () {
 	if c.Connection == "network" {
 		c.Connect()
-		c.Read()
+		if c.Command != "" {
+			c.Write()
+		} else {
+			c.Read()
+		}
 	}
   }()
 /*
