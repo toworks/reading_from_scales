@@ -4,6 +4,7 @@ import (
 	"fmt"
     "time"
 	"strings"
+	"regexp"
 	"net"
 )
 
@@ -87,7 +88,7 @@ func (c *Config) Network_receive() {
   
   c.Type = strings.ToLower(c.Type)
 
-  if c.Type == "bullat" {
-	c.ProcessingBullat(string(reply))
+  if c.Type == "systec" || regexp.MustCompile(`(?is)^b[uy].*at`).MatchString(c.Type) {
+	c.Processing_systec(string(reply))
   }
 }

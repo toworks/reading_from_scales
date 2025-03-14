@@ -16,7 +16,13 @@ import (
 const TimeFormatReverse string = "02.01.06 15:04:05"
 const TimeFormatDirect string = "01.02.06 15:04:05"
 
-func (c *Config) ProcessingBullat(message string) {
+func (c *Config) Processing_systec(message string) {
+  if regexp.MustCompile(`(?is)^$|v1`).MatchString(c.Protocol) {
+	c.Processing_systec_v1(message)
+  }
+}
+
+func (c *Config) Processing_systec_v1(message string) {
   msg := regexp.MustCompile("(?m).*<(.*);>[\\n\\r]+.*").ReplaceAllString(message, "$1")
 
   values := strings.Split(msg, ";")
@@ -34,14 +40,14 @@ func (c *Config) ProcessingBullat(message string) {
   _weightStabilized_2 := values[4]
 
   if DEBUG.enable {
-    c.ch_message <- fmt.Sprintf("d|:|%s: ProcessingBullat message: %#v", mod_name, msg)
-	c.ch_message <- fmt.Sprintf("d|:|%s: ProcessingBullat values: %#v", mod_name, values)
-	c.ch_message <- fmt.Sprintf("d|:|%s: ProcessingBullat  id_scale: %s  _timestamp: %s", mod_name, _id_scales, _timestamp)
-	c.ch_message <- fmt.Sprintf("d|:|%s: ProcessingBullat  id_scale: %s  _weight: %s", mod_name, _id_scales, _weight)
-	c.ch_message <- fmt.Sprintf("d|:|%s: ProcessingBullat  id_scale: %s  _weight_platform_1: %s", mod_name, _id_scales, _weight_platform_1)
-	c.ch_message <- fmt.Sprintf("d|:|%s: ProcessingBullat  id_scale: %s  _weight_platform_2: %s", mod_name, _id_scales, _weight_platform_2)
-	c.ch_message <- fmt.Sprintf("d|:|%s: ProcessingBullat  id_scale: %s  _weightStabilized_1: %s", mod_name, _id_scales, _weightStabilized_1)
-	c.ch_message <- fmt.Sprintf("d|:|%s: ProcessingBullat  id_scale: %s  _weightStabilized_2: %s", mod_name, _id_scales, _weightStabilized_2)
+    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec message: %#v", mod_name, msg)
+	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec values: %#v", mod_name, values)
+	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _timestamp: %s", mod_name, _id_scales, _timestamp)
+	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _weight: %s", mod_name, _id_scales, _weight)
+	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _weight_platform_1: %s", mod_name, _id_scales, _weight_platform_1)
+	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _weight_platform_2: %s", mod_name, _id_scales, _weight_platform_2)
+	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _weightStabilized_1: %s", mod_name, _id_scales, _weightStabilized_1)
+	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _weightStabilized_2: %s", mod_name, _id_scales, _weightStabilized_2)
   }
 }
 
