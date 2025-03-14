@@ -46,11 +46,14 @@ func (c *Config) Run() {
 
   go func () {
 	if c.Connection == "network" {
-		c.Connect()
-		if c.Command != "" {
-			c.Write()
-		} else {
-			c.Read()
+		for {
+			if err := c.Network_connect(); err == nil {
+				if c.Command != "" {
+					c.Network_send()
+				} else {
+					c.Network_receive()
+				}
+			}
 		}
 	}
   }()
