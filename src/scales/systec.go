@@ -183,34 +183,6 @@ func (c *Config) Processing_systec_v2(message string) {
 		c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _l_bias_weight: %s", mod_name, _id_scales, _l_bias_weight)
 	}
   }
-
-
-/*
-  values := strings.Split(msg, ";")
-
-  for i, v := range values {
-	values[i] = strings.TrimSpace(v)
-  }
-
-  _id_scales := fmt.Sprintf("%d", c.Id_scale)
-  _timestamp := c.get_datetime(values[0])
-  _weight := values[1]
-  _weight_platform_1 := values[5]
-  _weight_platform_2 := values[9]
-  _weightStabilized_1 := values[4]
-  _weightStabilized_2 := values[4]
-
-  if DEBUG.enable {
-    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec message: %#v", mod_name, msg)
-	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec values: %#v", mod_name, values)
-	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _timestamp: %s", mod_name, _id_scales, _timestamp)
-	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _weight: %s", mod_name, _id_scales, _weight)
-	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _weight_platform_1: %s", mod_name, _id_scales, _weight_platform_1)
-	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _weight_platform_2: %s", mod_name, _id_scales, _weight_platform_2)
-	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _weightStabilized_1: %s", mod_name, _id_scales, _weightStabilized_1)
-	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  _weightStabilized_2: %s", mod_name, _id_scales, _weightStabilized_2)
-  }
-*/
 }
 
 func (c *Config) Processing_systec_v2_create_array(message string) []string {
