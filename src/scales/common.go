@@ -47,16 +47,16 @@ func New(c *config.Scales, e bool, lv string, ch_message chan string, ch_db_mess
 func (c *Config) Run() {
 
   go func () {
-	if c.Connection == "network" {
-		for {
-			if err := c.Network_connect(); err == nil {
-				if c.Command != "" {
-					c.Network_send()
-				} else {
-					c.Network_receive()
-				}
-			}
-		}
-	}
+    if c.Connection == "network" {
+        for {
+            if err := c.Network_connect(); err == nil {
+                if c.Command != "" {
+                    c.Network_send()
+                } else {
+                    c.Network_receive()
+                }
+            }
+        }
+    }
   }()
 }
