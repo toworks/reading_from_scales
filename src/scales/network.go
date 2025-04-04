@@ -54,10 +54,10 @@ func (c *Config) Network_send() {
   connection_string := c.Network.Host+":"+fmt.Sprintf("%d", c.Network.Port)
 
   if c.Read_cycle > 1000 * 120 || c.Read_cycle <= 0 {
-    c.Read_cycle := 1000
+    c.Read_cycle = 1000
   }
 
-  timer := time.NewTicker(time.Duration(cycle) * time.Millisecond)
+  timer := time.NewTicker(time.Duration(c.Read_cycle) * time.Millisecond)
 
   for _ = range timer.C {
       t1 := time.Now()
