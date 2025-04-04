@@ -60,8 +60,6 @@ func (p *program) Stop(s service.Service) error {
 
 func (p *program) run() {
   ch_message := make(chan string, 255)
-  //ch_db := make(chan string, 255)
-  //ch_db_message := make(chan string, 255)
   ch_db_message := make(chan db.Kep_analytics_weight, 255)
   var _db db.Config
 
@@ -86,7 +84,6 @@ func (p *program) run() {
   if conf.Database.Enable {
     // write to database
     _db = *db.New(&conf.Database, conf.App.Log.Enable, conf.App.Log.Level, ch_message, ch_db_message)
-    //_db.Run(ch_db, ch_db_message)
 	_db.Run()
 
 	go func() {
@@ -103,50 +100,6 @@ func (p *program) run() {
 	}()
   }
 
-/*
-
-	cycle := 1000
-
-	timer := time.NewTicker(time.Duration(cycle) * time.Millisecond)
-	for _ = range timer.C {
-
-					  strEcho := "<SD>"
-						servAddr := "10.27.226.67:25687"
-						tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
-						if err != nil {
-							println("ResolveTCPAddr failed:", err.Error())
-							os.Exit(1)
-						}
-
-						conn, err := net.DialTCP("tcp", nil, tcpAddr)
-						if err != nil {
-							println("Dial failed:", err.Error())
-							os.Exit(1)
-						}
-
-						_, err = conn.Write([]byte(strEcho))
-						if err != nil {
-							println("Write to server failed:", err.Error())
-							os.Exit(1)
-						}
-
-						println("write to server = ", strEcho)
-
-						reply := make([]byte, 1024)
-
-						_, err = conn.Read(reply)
-						if err != nil {
-							println("Write to server failed:", err.Error())
-							os.Exit(1)
-						}
-
-						println("reply from server=", string(reply))
-
-						conn.Close()
-	
-	}
-*/
-	
 //  ch_mqtt := make(chan string, 255)
 //  ch_db := make(chan string, 255)
 //  ch_db_message := make(chan string, 255)
