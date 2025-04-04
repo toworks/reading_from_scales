@@ -8,6 +8,7 @@ import (
 //  "regexp"
 
   "reading_from_scales/src/config"
+  db "reading_from_scales/src/database"
 )
 
 type Config struct {
@@ -15,6 +16,7 @@ type Config struct {
   ch_message chan string
   connTCP *net.TCPConn
   connUDP *net.UDPConn
+  ch_db_message chan db.Kep_analytics_weight
 }
 
 type _debug struct {
@@ -29,11 +31,11 @@ var (
   mod_name = "scales"
 )
 
-func New(c *config.Scales, e bool, lv string, ch_message chan string) *Config {
+func New(c *config.Scales, e bool, lv string, ch_message chan string, ch_db_message chan db.Kep_analytics_weight) *Config {
   DEBUG.enable = e
   DEBUG.level = lv
 
-  nc := Config{c, ch_message, nil, nil}
+  nc := Config{c, ch_message, nil, nil, ch_db_message}
 
   if DEBUG.enable {
     nc.ch_message <- fmt.Sprintf("d|:|%s: config: %#v", mod_name, c)
