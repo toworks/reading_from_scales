@@ -99,56 +99,6 @@ func (p *program) run() {
         }
 	}()
   }
-
-//  ch_mqtt := make(chan string, 255)
-//  ch_db := make(chan string, 255)
-//  ch_db_message := make(chan string, 255)
-//  var _db db.Config
-/*
-  // mqtt: receiving data by subscription
-  if conf.Mqtt.Enable {
-    go mqtt_run(conf, ch_mqtt)
-  }
-
-  if conf.Database.Enable {
-    // write to database
-    //_db = *db.New(&conf.Database, conf.App.Log.Enable, conf.App.Log.Level, ch_db_message)
-	//_db.Run(ch_db, ch_db_message)
-
-	go func() {
-        for {
-            select {
-                case message := <-ch_db_message:
-					msg := strings.Split(message, "|:|")
-					if len(msg) == 2 {
-						fmt.Printf("%s\n", msg[1])
-						Log.Save(msg[0], msg[1])
-					}
-            }
-        }
-	}()
-  }
-
-  if conf.Mqtt.Enable {
-    go func() {
-        for {
-            select {
-                case v := <-ch_mqtt:
-						_values := get_values(v)
-						_topic := _values[1]
-						_value := _values[2]
-						values := processing_data(_topic, _value)
-						if values != "" {
-							ch_db <- values
-						}
-//                case <-quit:
-//                    fmt.Println("quit")
-//                    return
-            }
-        }
-    }()
-  }
-*/
 }
 
 func main() {
