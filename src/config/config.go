@@ -28,6 +28,7 @@ type Database struct {
 	Username                      string `yaml:"username"`
 	Password                      string `yaml:"password"`
 	Database                      string `yaml:"database"`
+	Table                         string `yaml:"table"`
 }
 
 type App struct {
