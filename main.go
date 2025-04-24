@@ -63,41 +63,28 @@ func (p *program) run() {
   ch_db_message := make(chan db.Kep_analytics_weight, 255)
   var _db db.Config
 
-  if conf.Scales.Enable {
-    scls := *scales.New(&conf.Scales, conf.App.Log.Enable, conf.App.Log.Level, ch_message, ch_db_message)
-    scls.Run()
-  }
-
-    go func() {
-        for {
-            select {
-                case message := <-ch_message:
-                    msg := strings.Split(message, "|:|")
-                    if len(msg) == 2 {
-                        fmt.Printf("%s\n", msg[1])
-                        Log.Save(msg[0], msg[1])
-                    }
-            }
-        }
-    }()
+  go func() {
+      for {
+          select {
+              case message := <-ch_message:
+                  msg := strings.Split(message, "|:|")
+                  if len(msg) == 2 {
+                      fmt.Printf("%s\n", msg[1])
+                      Log.Save(msg[0], msg[1])
+                  }
+          }
+      }
+  }()
 
   if conf.Database.Enable {
     // write to database
     _db = *db.New(&conf.Database, conf.App.Log.Enable, conf.App.Log.Level, ch_message, ch_db_message)
     _db.Run()
+  }
 
-    go func() {
-        for {
-            select {
-                case message := <-ch_message:
-                    msg := strings.Split(message, "|:|")
-                    if len(msg) == 2 {
-                        fmt.Printf("%s\n", msg[1])
-                        Log.Save(msg[0], msg[1])
-                    }
-            }
-        }
-    }()
+  if conf.Scales.Enable {
+    scls := *scales.New(&conf.Scales, conf.App.Log.Enable, conf.App.Log.Level, ch_message, ch_db_message)
+    scls.Run()
   }
 }
 
