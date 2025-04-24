@@ -54,6 +54,7 @@ func New(c *config.Scales, e bool, lv string, ch_message chan string, ch_db_mess
 func (c *Config) Run() {
 
   go func () {
+	err := fmt.Errorf("empty")
 
 	if c.Read_cycle > 1000 * 120 || c.Read_cycle <= 0 {
 		c.Read_cycle = 1000
@@ -63,12 +64,14 @@ func (c *Config) Run() {
 
 	for _ = range timer.C {
 		if c.Connection == "network" {
+			if err != nil {
+				err = c.Network_connect();
+				continue
+			}
 		    if c.Command != "" {
-			    if err := c.Network_connect(); err == nil {
-					c.Network_send()
-				}
+				err = c.Network_send()
             } else {
-                c.Network_receive()
+                err = c.Network_receive()
 			}
 		}
     }
