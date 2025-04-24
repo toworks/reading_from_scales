@@ -82,9 +82,11 @@ func (p *program) run() {
     _db.Run()
   }
 
-  if conf.Scales.Enable {
-    scls := *scales.New(&conf.Scales, conf.App.Log.Enable, conf.App.Log.Level, ch_message, ch_db_message)
-    scls.Run()
+  for _, scale := range conf.Scales {
+	if scale.Enable {
+		_scale := *scales.New(&scale, conf.App.Log.Enable, conf.App.Log.Level, ch_message, ch_db_message)
+		_scale.Run()
+	}
   }
 }
 

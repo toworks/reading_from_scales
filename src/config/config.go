@@ -16,7 +16,7 @@ var (
 
 type Config struct {
 	Database     Database `yaml:"database"`
-	Scales       Scales   `yaml:"scales"`
+	Scales       []Scale  `yaml:"scales"`
 	App          App      `yaml:"app"`
 }
 
@@ -43,7 +43,7 @@ type App struct {
 	} `yaml:"service"`
 }
 
-type Scales struct {
+type Scale struct {
 	Enable             bool   `yaml:"enable"`
 	Connection         string `yaml:"connection"`
 	Type               string `yaml:"type"`

@@ -12,7 +12,7 @@ import (
 )
 
 type Config struct {
-  *config.Scales
+  *config.Scale
   ch_message chan string
   connTCP *net.TCPConn
   connUDP *net.UDPConn
@@ -32,7 +32,7 @@ var (
   mod_name = "scales"
 )
 
-func New(c *config.Scales, e bool, lv string, ch_message chan string, ch_db_message chan db.Kep_analytics_weight) *Config {
+func New(c *config.Scale, e bool, lv string, ch_message chan string, ch_db_message chan db.Kep_analytics_weight) *Config {
   DEBUG.enable = e
   DEBUG.level = lv
 
