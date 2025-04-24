@@ -70,33 +70,7 @@ func (c *Config) Run() {
             } else {
                 c.Network_receive()
 			}
-/*
-			t1 := time.Now()
-			_, err = c.connTCP.Write([]byte(c.Command))
-			t2 := time.Now()
-			if err != nil {
-				c.ch_message <- fmt.Sprintf("e|:|%s: send failed: %s  error: %s", mod_name, connection_string, err.Error())
-			}
-			if DEBUG.enable {
-				c.ch_message <- fmt.Sprintf("d|:|%s: send command: %s", mod_name, c.Command)
-				c.ch_message <- fmt.Sprintf("d|:|%s: send command time: %s", mod_name, t2.Sub(t1))
-			}
-			c.Network_receive()
-*/
 		}
-
-
-/*
-        for {
-            if err := c.Network_connect(); err == nil {
-                if c.Command != "" {
-                    c.Network_send()
-                } else {
-                    c.Network_receive()
-                }
-            }
-        }
-*/
     }
   }()
 }
