@@ -48,30 +48,20 @@ func (c *Config) Network_connect() error {
 //  переделать убрать/изменить цикл запроса
 func (c *Config) Network_send() error {
   var err error
-/*
-  connection_string := c.Network.Host+":"+fmt.Sprintf("%d", c.Network.Port)
 
-  if c.Read_cycle > 1000 * 120 || c.Read_cycle <= 0 {
-    c.Read_cycle = 1000
-  }
-
-  timer := time.NewTicker(time.Duration(c.Read_cycle) * time.Millisecond)
-
-  for _ = range timer.C {
-*/
-      t1 := time.Now()
-      _, err = c.connTCP.Write([]byte(c.Command))
-      t2 := time.Now()
-      if err != nil {
+  t1 := time.Now()
+  _, err = c.connTCP.Write([]byte(c.Command))
+  t2 := time.Now()
+  if err != nil {
         c.ch_message <- fmt.Sprintf("e|:|%s: send failed: %s  error: %s", mod_name, c.network_connection_string, err.Error())
-		return err
-      }
-      if DEBUG.enable {
-          c.ch_message <- fmt.Sprintf("d|:|%s: send command: %s", mod_name, c.Command)
-          c.ch_message <- fmt.Sprintf("d|:|%s: send command time: %s", mod_name, t2.Sub(t1))
-      }
-      c.Network_receive()
-//  }
+        return err
+  }
+  if DEBUG.enable {
+        c.ch_message <- fmt.Sprintf("d|:|%s: send command: %s", mod_name, c.Command)
+        c.ch_message <- fmt.Sprintf("d|:|%s: send command time: %s", mod_name, t2.Sub(t1))
+  }
+  c.Network_receive()
+
   return nil
 }
 
@@ -94,7 +84,7 @@ func (c *Config) Network_receive() error {
     c.ch_message <- fmt.Sprintf("d|:|%s: receive raw data: %s", mod_name, string(reply))
     c.ch_message <- fmt.Sprintf("d|:|%s: receive time: %s", mod_name, t2.Sub(t1))
   }
-  
+
   c.Type = strings.ToLower(c.Type)
 
   if c.Type == "systec" || regexp.MustCompile(`(?is)^b[uy].*at`).MatchString(c.Type) {
