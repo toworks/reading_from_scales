@@ -4,7 +4,7 @@ import (
   "fmt"
   "net"
 //  "strings"
-//  "time"
+  "time"
 //  "regexp"
 
   "reading_from_scales/src/config"
@@ -16,6 +16,7 @@ type Config struct {
   ch_message chan string
   connTCP *net.TCPConn
   connUDP *net.UDPConn
+  network_connection_string string
   ch_db_message chan db.Kep_analytics_weight
 }
 
@@ -35,7 +36,13 @@ func New(c *config.Scales, e bool, lv string, ch_message chan string, ch_db_mess
   DEBUG.enable = e
   DEBUG.level = lv
 
-  nc := Config{c, ch_message, nil, nil, ch_db_message}
+  var ncs string
+
+  if c.Connection == "network" {
+	ncs = c.Network.Host+":"+fmt.Sprintf("%d", c.Network.Port)
+  }
+ 
+  nc := Config{c, ch_message, nil, nil, ncs, ch_db_message}
 
   if DEBUG.enable {
     nc.ch_message <- fmt.Sprintf("d|:|%s: config: %#v", mod_name, c)
@@ -47,7 +54,39 @@ func New(c *config.Scales, e bool, lv string, ch_message chan string, ch_db_mess
 func (c *Config) Run() {
 
   go func () {
-    if c.Connection == "network" {
+
+	if c.Read_cycle > 1000 * 120 || c.Read_cycle <= 0 {
+		c.Read_cycle = 1000
+	}
+
+	timer := time.NewTicker(time.Duration(c.Read_cycle) * time.Millisecond)
+
+	for _ = range timer.C {
+		if c.Connection == "network" {
+		    if c.Command != "" {
+			    if err := c.Network_connect(); err == nil {
+					c.Network_send()
+				}
+            } else {
+                c.Network_receive()
+			}
+/*
+			t1 := time.Now()
+			_, err = c.connTCP.Write([]byte(c.Command))
+			t2 := time.Now()
+			if err != nil {
+				c.ch_message <- fmt.Sprintf("e|:|%s: send failed: %s  error: %s", mod_name, connection_string, err.Error())
+			}
+			if DEBUG.enable {
+				c.ch_message <- fmt.Sprintf("d|:|%s: send command: %s", mod_name, c.Command)
+				c.ch_message <- fmt.Sprintf("d|:|%s: send command time: %s", mod_name, t2.Sub(t1))
+			}
+			c.Network_receive()
+*/
+		}
+
+
+/*
         for {
             if err := c.Network_connect(); err == nil {
                 if c.Command != "" {
@@ -57,6 +96,7 @@ func (c *Config) Run() {
                 }
             }
         }
+*/
     }
   }()
 }
