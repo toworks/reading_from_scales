@@ -247,7 +247,7 @@ func (c *Config) check_disabled_parameter(match string) bool {
   if c.Disabled_parameters != "" {
     pattern = "(?is)"+c.Disabled_parameters
   } else {
-    pattern = "(?is).*"
+    pattern = "(?is)^!" + match + "$"
   }
   res := regexp.MustCompile(pattern).MatchString(match)
   if DEBUG.enable {
