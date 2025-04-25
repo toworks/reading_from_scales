@@ -32,12 +32,6 @@ func (c *Config) Processing_systec(message string) {
 func (c *Config) Processing_systec_v1(message string) {
   msg := regexp.MustCompile("(?m).*<(.*);>[\\n\\r]+.*").ReplaceAllString(message, "$1")
 
-  var pattern_disabled_parameters string
-
-  if c.Disabled_parameters != "" {
-    pattern_disabled_parameters = "(?is)"+c.Disabled_parameters
-  }
-
   values := strings.Split(msg, ";")
 
   for i, v := range values {
@@ -51,26 +45,25 @@ func (c *Config) Processing_systec_v1(message string) {
 
   kaw.Id_scales = fmt.Sprintf("%d", c.Id_scale)
   kaw.Timestamp = c.get_datetime(values[0])
-  if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight`) {
+  if ! c.check_disabled_parameter(`weight`) {
     kaw.Weight = values[1]
   }
-  if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight_platform_1`) {
+  if ! c.check_disabled_parameter(`weight_platform_1`) {
     kaw.Weight_platform_1 = values[5]
   }
-  if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight_platform_2`) {
+  if ! c.check_disabled_parameter(`weight_platform_2`) {
     kaw.Weight_platform_2 = values[9]
   }
-  if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight_stabilized_1`) {
+  if ! c.check_disabled_parameter(`weight_stabilized_1`) {
     kaw.Weight_stabilized_1 = values[4]
   }
-  if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight_stabilized_2`) {
+  if ! c.check_disabled_parameter(`weight_stabilized_2`) {
     kaw.Weight_stabilized_2 = values[4]
   }
 
   if DEBUG.enable {
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  message: %#v", mod_name, msg)
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  values: %#v", mod_name, values)
-    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  pattern disabled parameters: %s", mod_name, pattern_disabled_parameters)
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  timestamp: %s", mod_name, kaw.Id_scales, kaw.Timestamp)
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  weight: %s", mod_name, kaw.Id_scales, kaw.Weight)
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  weight_platform_1: %s", mod_name, kaw.Id_scales, kaw.Weight_platform_1)
@@ -84,12 +77,6 @@ func (c *Config) Processing_systec_v1(message string) {
 
 func (c *Config) Processing_systec_v2(message string) {
   messages := regexp.MustCompile(`\w\d\[.*?\]`).FindAllString(message, -1)
-
-  var pattern_disabled_parameters string
-
-  if c.Disabled_parameters != "" {
-    pattern_disabled_parameters = "(?is)"+c.Disabled_parameters
-  }
 
   kaw := db.Kep_analytics_weight{}
   c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message: %#v", mod_name, kaw)
@@ -114,13 +101,13 @@ func (c *Config) Processing_systec_v2(message string) {
             }
             kaw.Id_scales = fmt.Sprintf("%d", c.Id_scale)
             kaw.Timestamp = c.get_datetime(values[0])
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight`) {
+            if ! c.check_disabled_parameter(`weight`) {
                 kaw.Weight = values[3]
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`h_bias_weight`) {
+            if ! c.check_disabled_parameter(`h_bias_weight`) {
                 kaw.H_bias_weight = values[7]
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`l_bias_weight`) {
+            if ! c.check_disabled_parameter(`l_bias_weight`) {
                 kaw.L_bias_weight = values[6]
             }
           }
@@ -134,10 +121,10 @@ func (c *Config) Processing_systec_v2(message string) {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: P1  values: %#v", mod_name, values)
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight_platform_1`) {
+            if ! c.check_disabled_parameter(`weight_platform_1`) {
                 kaw.Weight_platform_1 = values[3]
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight_stabilized_1`) {
+            if ! c.check_disabled_parameter(`weight_stabilized_1`) {
                 kaw.Weight_stabilized_1 = values[2]
             }
           }
@@ -151,10 +138,10 @@ func (c *Config) Processing_systec_v2(message string) {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: P2  values: %#v", mod_name, values)
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight_platform_2`) {
+            if ! c.check_disabled_parameter(`weight_platform_2`) {
                 kaw.Weight_platform_2 = values[3]
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight_stabilized_2`) {
+            if ! c.check_disabled_parameter(`weight_stabilized_2`) {
                 kaw.Weight_stabilized_2 = values[2]
             }
           }
@@ -168,10 +155,10 @@ func (c *Config) Processing_systec_v2(message string) {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: P3  values: %#v", mod_name, values)
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight_platform_3`) {
+            if ! c.check_disabled_parameter(`weight_platform_3`) {
                 kaw.Weight_platform_3 = values[3]
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`weight_stabilized_3`) {
+            if ! c.check_disabled_parameter(`weight_stabilized_3`) {
                 kaw.Weight_stabilized_3 = values[2]
             }
           }
@@ -185,7 +172,7 @@ func (c *Config) Processing_systec_v2(message string) {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: S1  values: %#v", mod_name, values)
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`w1`) {
+            if ! c.check_disabled_parameter(`w1`) {
                 kaw.W1 = values[3]
             }
           }
@@ -199,7 +186,7 @@ func (c *Config) Processing_systec_v2(message string) {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: S2  values: %#v", mod_name, values)
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`w2`) {
+            if ! c.check_disabled_parameter(`w2`) {
                 kaw.W2 = values[3]
             }
           }
@@ -213,7 +200,7 @@ func (c *Config) Processing_systec_v2(message string) {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: S3  values: %#v", mod_name, values)
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`w3`) {
+            if ! c.check_disabled_parameter(`w3`) {
                 kaw.W3 = values[3]
             }
           }
@@ -227,14 +214,13 @@ func (c *Config) Processing_systec_v2(message string) {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: S4  values: %#v", mod_name, values)
             }
-            if ! regexp.MustCompile(pattern_disabled_parameters).MatchString(`w4`) {
+            if ! c.check_disabled_parameter(`w4`) {
                 kaw.W4 = values[3]
             }
           }
         }
       }
       if DEBUG.enable {
-        c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2  pattern disabled parameters: %s", mod_name, pattern_disabled_parameters)
         c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2  id_scale: %s  timestamp: %s", mod_name, kaw.Id_scales, kaw.Timestamp)
         c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2  id_scale: %s  weight: %s", mod_name, kaw.Id_scales, kaw.Weight)
         c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2  id_scale: %s  Weight_platform_1: %s", mod_name, kaw.Id_scales, kaw.Weight_platform_1)
@@ -253,6 +239,21 @@ func (c *Config) Processing_systec_v2(message string) {
   }
 
   c.ch_db_message <- kaw
+}
+
+func (c *Config) check_disabled_parameter(match string) bool {
+  var pattern string
+
+  if c.Disabled_parameters != "" {
+    pattern = "(?is)"+c.Disabled_parameters
+  } else {
+    pattern = "(?is).*"
+  }
+  res := regexp.MustCompile(pattern).MatchString(match)
+  if DEBUG.enable {
+    c.ch_message <- fmt.Sprintf("d|:|%s: disabled parameters patern: %s  match: %s  status: %v", mod_name, pattern, match, res)
+  }
+  return res
 }
 
 func (c *Config) Processing_systec_v2_create_array(message string) []string {
