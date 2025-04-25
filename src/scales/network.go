@@ -60,7 +60,6 @@ func (c *Config) Network_send() error {
         c.ch_message <- fmt.Sprintf("d|:|%s: send command: %s", mod_name, c.Command)
         c.ch_message <- fmt.Sprintf("d|:|%s: send command time: %s", mod_name, t2.Sub(t1))
   }
-  c.Network_receive()
 
   return nil
 }

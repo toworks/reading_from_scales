@@ -70,9 +70,8 @@ func (c *Config) Run() {
 			}
 		    if c.Command != "" {
 				err = c.Network_send()
-            } else {
-                err = c.Network_receive()
 			}
+            err = c.Network_receive()
 		}
     }
   }()
