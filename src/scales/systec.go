@@ -40,6 +40,7 @@ func (c *Config) Processing_systec_v1(message string) {
 
   kaw := db.Kep_analytics_weight{}
   if DEBUG.enable {
+	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec message: count: %v", mod_name, len(values))
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec message: %#v", mod_name, kaw)
   }
 
@@ -60,6 +61,20 @@ func (c *Config) Processing_systec_v1(message string) {
   if ! c.check_disabled_parameter(`weight_stabilized_2`) {
     kaw.Weight_stabilized_2 = values[4]
   }
+  if len(values) >= 29 {
+	  if ! c.check_disabled_parameter(`w1`) {
+		kaw.W1 = values[14]
+	  }
+	  if ! c.check_disabled_parameter(`w2`) {
+		kaw.W2 = values[19]
+	  }
+	  if ! c.check_disabled_parameter(`w3`) {
+		kaw.W3 = values[24]
+	  }
+	  if ! c.check_disabled_parameter(`w4`) {
+		kaw.W4 = values[29]
+	  }
+  }
 
   if DEBUG.enable {
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  message: %#v", mod_name, msg)
@@ -70,6 +85,12 @@ func (c *Config) Processing_systec_v1(message string) {
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  weight_platform_2: %s", mod_name, kaw.Id_scales, kaw.Weight_platform_2)
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  weight_stabilized_1: %s", mod_name, kaw.Id_scales, kaw.Weight_stabilized_1)
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  weight_stabilized_2: %s", mod_name, kaw.Id_scales, kaw.Weight_stabilized_2)
+    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  w1: %s", mod_name, kaw.Id_scales, kaw.W1)
+    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  w2: %s", mod_name, kaw.Id_scales, kaw.W2)
+    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  w3: %s", mod_name, kaw.Id_scales, kaw.W3)
+    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  w4: %s", mod_name, kaw.Id_scales, kaw.W4)
+    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  h_bias_weight: %s", mod_name, kaw.Id_scales, kaw.H_bias_weight)
+    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  l_bias_weight: %s", mod_name, kaw.Id_scales, kaw.L_bias_weight)
   }
 
   c.ch_db_message <- kaw
