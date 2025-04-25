@@ -44,14 +44,15 @@ type App struct {
 }
 
 type Scale struct {
-	Enable             bool   `yaml:"enable"`
-	Connection         string `yaml:"connection"`
-	Type               string `yaml:"type"`
-	Protocol           string `yaml:"protocol"`
-	Id_scale           int    `yaml:"id_scale"`
-	Command            string `yaml:"command"`
-	Coefficient        int    `yaml:"coefficient"`
-	Read_cycle         int    `yaml:"read_cycle"`
+	Enable                     bool   `yaml:"enable"`
+	Connection                 string `yaml:"connection"`
+	Type                       string `yaml:"type"`
+	Protocol                   string `yaml:"protocol"`
+	Id_scale                   int    `yaml:"id_scale"`
+	Command                    string `yaml:"command"`
+	Coefficient                int    `yaml:"coefficient"`
+	Disabled_parameters        string `yaml:"disabled_parameters"`
+	Read_cycle                 int    `yaml:"read_cycle"`
 	Network         struct {
 		Host               string `yaml:"host"`
 		Port               int    `yaml:"port"`
