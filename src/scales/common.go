@@ -5,7 +5,7 @@ import (
   "net"
 //  "strings"
   "time"
-//  "regexp"
+  "regexp"
 
   "reading_from_scales/src/config"
   db "reading_from_scales/src/database"
@@ -14,8 +14,7 @@ import (
 type Config struct {
   *config.Scale
   ch_message chan string
-  connTCP *net.TCPConn
-  connUDP *net.UDPConn
+  _connect net.Conn
   network_connection_string string
   ch_db_message chan db.Kep_analytics_weight
 }
@@ -42,7 +41,7 @@ func New(c *config.Scale, e bool, lv string, ch_message chan string, ch_db_messa
 	ncs = c.Network.Host+":"+fmt.Sprintf("%d", c.Network.Port)
   }
  
-  nc := Config{c, ch_message, nil, nil, ncs, ch_db_message}
+  nc := Config{c, ch_message, nil, ncs, ch_db_message}
 
   if DEBUG.enable {
     nc.ch_message <- fmt.Sprintf("d|:|%s: config: %#v", mod_name, c)
@@ -63,7 +62,7 @@ func (c *Config) Run() {
 	timer := time.NewTicker(time.Duration(c.Read_cycle) * time.Millisecond)
 
 	for _ = range timer.C {
-		if c.Connection == "network" {
+		if regexp.MustCompile(`(?is)^network$`).MatchString(c.Connection) {
 			if err != nil {
 				err = c.Network_connect();
 				continue
@@ -72,6 +71,8 @@ func (c *Config) Run() {
 				err = c.Network_send()
 			}
             err = c.Network_receive()
+		} else {
+			c.ch_message <- fmt.Sprintf("w|:|%s: connection type: '%s' not supported", mod_name, c.Connection)
 		}
     }
   }()
