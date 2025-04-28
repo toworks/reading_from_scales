@@ -23,7 +23,7 @@ func (c *Config) Network_connect() error {
     c.ch_message <- fmt.Sprintf("e|:|%s: dial failed: %s  error: %s", mod_name, c.network_connection_string, err.Error())
     return err
   }
-
+  /* set timeout read/write */
   c._connect.SetDeadline(time.Now().Add(time.Second * 10))
 
   c.ch_message <- fmt.Sprintf("i|:|%s: connect: %s  time: %s", mod_name, c.network_connection_string, t2.Sub(t1))
@@ -34,7 +34,6 @@ func (c *Config) Network_disconnect() error {
 
 }
 */
-//  переделать убрать/изменить цикл запроса
 func (c *Config) Network_send() error {
   var err error
 
@@ -46,8 +45,7 @@ func (c *Config) Network_send() error {
         return err
   }
   if DEBUG.enable {
-        c.ch_message <- fmt.Sprintf("d|:|%s: send command: %s", mod_name, c.Command)
-        c.ch_message <- fmt.Sprintf("d|:|%s: send command time: %s", mod_name, t2.Sub(t1))
+        c.ch_message <- fmt.Sprintf("d|:|%s: host: %s  time: %s  send command: %s", mod_name, c.network_connection_string, t2.Sub(t1), c.Command)
   }
 
   return nil
@@ -69,8 +67,7 @@ func (c *Config) Network_receive() error {
 	return err
   }
   if DEBUG.enable {
-    c.ch_message <- fmt.Sprintf("d|:|%s: receive raw data: %s", mod_name, string(reply))
-    c.ch_message <- fmt.Sprintf("d|:|%s: receive time: %s", mod_name, t2.Sub(t1))
+    c.ch_message <- fmt.Sprintf("d|:|%s: host: %s  time: %s  receive raw data: %s", mod_name, c.network_connection_string, t2.Sub(t1), string(reply))
   }
 
   c.Type = strings.ToLower(c.Type)
