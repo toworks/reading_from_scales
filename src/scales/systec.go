@@ -15,10 +15,12 @@ import (
   db "reading_from_scales/src/database"
 )
 
-const TimeFormatReverse string = "02.01.06 15:04:05"
-const TimeFormatDirect string = "01.02.06 15:04:05"
-const TimeFormatReverseNoSec string = "02.01.06 15:04"
-const TimeFormatDirectNoSec string = "01.02.06 15:04"
+var TimeFormatArray = []string {"2006-01-02 15:04:05.000",
+                                "06-01-02 15:04:05",
+                                "02.01.06 15:04:05",
+                                "01.02.06 15:04:05",
+                                "02.01.06 15:04",
+                                "01.02.06 15:04"}
 
 
 func (c *Config) Processing_systec(message string) {
@@ -293,27 +295,16 @@ func (c *Config) Processing_systec_v2_create_array(message string) []string {
 }
 
 func (c *Config) get_datetime(timestamp string) string {
-  dt, err := time.Parse(TimeFormatReverse, timestamp)
-  if err != nil {
-    c.ch_message <- fmt.Sprintf("e|:|%s: format: TimeFormatReverse  error: %s\n", mod_name, err.Error())
-  } else {
-    return dt.Format(TimeFormat)
-  }
-  dt, err = time.Parse(TimeFormatDirect, timestamp)
-  if err != nil {
-    c.ch_message <- fmt.Sprintf("e|:|%s: format: TimeFormatDirect  error: %s\n", mod_name, err.Error())
-  } else {
-    return dt.Format(TimeFormat)
-  }
-  dt, err = time.Parse(TimeFormatReverseNoSec, timestamp)
-  if err != nil {
-    c.ch_message <- fmt.Sprintf("e|:|%s: format: TimeFormatReverseNoSec  error: %s\n", mod_name, err.Error())
-  } else {
-    return time.Now().Format(TimeFormat)
-  }
-  dt, err = time.Parse(TimeFormatDirectNoSec, timestamp)
-  if err != nil {
-    c.ch_message <- fmt.Sprintf("e|:|%s: format: TimeFormatDirectNoSec  error: %s\n", mod_name, err.Error())
+  var dt time.Time
+  var err error
+  for _, time_format := range TimeFormatArray {
+    dt, err = time.Parse(time_format, timestamp)
+	if err != nil {
+		fmt.Printf("error field: '%s'\n", err.Error())
+		c.ch_message <- fmt.Sprintf("e|:|%s: time format: '%s':  error: %s\n", mod_name, time_format, err.Error())
+	} else {
+		return dt.Format(TimeFormat)
+	}
   }
   if err != nil {
     return time.Now().Format(TimeFormat)
