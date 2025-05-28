@@ -301,7 +301,7 @@ func (c *Config) get_datetime(timestamp string) string {
     dt, err = time.Parse(time_format, timestamp)
 	if err != nil {
 		fmt.Printf("error field: '%s'\n", err.Error())
-		c.ch_message <- fmt.Sprintf("e|:|%s: time format: '%s':  error: %s\n", mod_name, time_format, err.Error())
+		c.ch_message <- fmt.Sprintf("e|:|%s: time format: %s\n", mod_name, err.Error())
 	} else {
 		return dt.Format(TimeFormat)
 	}
