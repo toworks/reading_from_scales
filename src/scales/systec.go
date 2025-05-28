@@ -300,13 +300,13 @@ func (c *Config) get_datetime(timestamp string) string {
   for _, time_format := range TimeFormatArray {
     dt, err = time.Parse(time_format, timestamp)
 	if err != nil {
-		fmt.Printf("error field: '%s'\n", err.Error())
-		c.ch_message <- fmt.Sprintf("e|:|%s: time format: %s\n", mod_name, err.Error())
+		c.ch_message <- fmt.Sprintf("w|:|%s: time format: %s", mod_name, err.Error())
 	} else {
 		return dt.Format(TimeFormat)
 	}
   }
   if err != nil {
+	c.ch_message <- fmt.Sprintf("w|:|%s: time format: system time is applied", mod_name)
     return time.Now().Format(TimeFormat)
   }
   return dt.Format(TimeFormat)
