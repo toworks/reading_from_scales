@@ -67,6 +67,9 @@ func (c *Config) Run() {
 				for _ = range timer.C {
 					if err != nil {
 						err = c.Network_connect()
+						if err != nil {
+							continue
+						}
 					}
 					err = c.Network_send()
 					err = c.Network_receive()
