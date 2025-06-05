@@ -72,7 +72,6 @@ func (p *program) run() {
                     fmt.Printf("%s\n", msg[1])
                     Log.Save(msg[0], msg[1])
                 }
-			default:
         }
     }
   }()
