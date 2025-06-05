@@ -64,16 +64,17 @@ func (p *program) run() {
   var _db db.Config
 
   go func() {
-      for {
-          select {
-              case message := <-ch_message:
-                  msg := strings.Split(message, "|:|")
-                  if len(msg) == 2 {
-                      fmt.Printf("%s\n", msg[1])
-                      Log.Save(msg[0], msg[1])
-                  }
-          }
-      }
+	for {
+        select {
+            case message := <-ch_message:
+				msg := strings.Split(message, "|:|")
+                if len(msg) == 2 {
+                    fmt.Printf("%s\n", msg[1])
+                    Log.Save(msg[0], msg[1])
+                }
+			default:
+        }
+    }
   }()
 
   if conf.Database.Enable {

@@ -95,7 +95,10 @@ func (c *Config) Processing_systec_v1(message string) {
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec  id_scale: %s  l_bias_weight: %s", mod_name, kaw.Id_scales, kaw.L_bias_weight)
   }
 
-  c.ch_db_message <- kaw
+  select {
+	case c.ch_db_message <- kaw:
+	default:
+  }
 }
 
 func (c *Config) Processing_systec_v2(message string) {
@@ -261,7 +264,10 @@ func (c *Config) Processing_systec_v2(message string) {
       }
   }
 
-  c.ch_db_message <- kaw
+  select {
+	case c.ch_db_message <- kaw:
+	default:
+  }
 }
 
 func (c *Config) check_disabled_parameter(match string) bool {

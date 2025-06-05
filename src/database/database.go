@@ -152,6 +152,7 @@ func (c *Config) Run() {
 						} else {
 							c.ch_message <- fmt.Sprintf("e|:|%s: values is empty", mod_name)
 						}
+				default:
             }
         }
   }()
