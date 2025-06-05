@@ -72,7 +72,13 @@ func (c *Config) Run() {
 						}
 					}
 					err = c.Network_send()
+					if err != nil {
+						c._connect.Close()
+					}
 					err = c.Network_receive()
+					if err != nil {
+						c._connect.Close()
+					}
 				}
 			} else {
 				for {
@@ -84,6 +90,9 @@ func (c *Config) Run() {
 						}
 					}
 					err = c.Network_receive()
+					if err != nil {
+						c._connect.Close()
+					}
 				}
 			}
 	}()
