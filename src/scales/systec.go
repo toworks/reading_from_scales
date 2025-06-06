@@ -316,7 +316,6 @@ func (c *Config) get_datetime(timestamp string) string {
 	}
   }
   if ( err != nil && !c.Local_timestamp ) || c.Local_timestamp {
-	c.ch_message <- fmt.Sprintf("w|:|%s: time format: local timestamp is applied", mod_name)
 	local_timestamp := time.Now().Format(TimeFormat)
 	if DEBUG.enable {
 		c.ch_message <- fmt.Sprintf("d|:|%s: timestamp remote: '%s'  local: %#v", mod_name, timestamp, local_timestamp)
