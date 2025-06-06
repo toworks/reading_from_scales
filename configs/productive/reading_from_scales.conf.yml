@@ -63,7 +63,7 @@ scales:
             type: bullat
             protocol:
             id_scale: 791
-            command: <SD>
+            command:
             coefficient: 1
             disabled_parameters:
             local_timestamp: true
@@ -79,7 +79,7 @@ scales:
             type: bullat
             protocol:
             id_scale: 792
-            command: <SD>
+            command:
             coefficient: 1
             disabled_parameters:
             local_timestamp: true
@@ -95,7 +95,7 @@ scales:
             type: bullat
             protocol:
             id_scale: 793
-            command: <SD>
+            command:
             coefficient: 1
             disabled_parameters:
             local_timestamp: true
