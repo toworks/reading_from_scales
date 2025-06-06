@@ -58,6 +58,8 @@ func (c *Config) Run() {
 	go func () {
 			err := fmt.Errorf("empty")
 
+			c.ch_message <- fmt.Sprintf("i|:|%s: use local timestamp: %t", mod_name, c.Local_timestamp)
+
 			if c.Command != "" {
 				if c.Read_cycle > 1000 * 120 || c.Read_cycle <= 0 {
 					c.Read_cycle = 1000

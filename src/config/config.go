@@ -52,6 +52,7 @@ type Scale struct {
 	Command                    string `yaml:"command"`
 	Coefficient                int    `yaml:"coefficient"`
 	Disabled_parameters        string `yaml:"disabled_parameters"`
+	Local_timestamp            bool   `yaml:"local_timestamp"`
 	Read_cycle                 int    `yaml:"read_cycle"`
 	Network         struct {
 		Host               string `yaml:"host"`

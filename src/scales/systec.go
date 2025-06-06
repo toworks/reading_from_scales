@@ -297,7 +297,7 @@ func (c *Config) Processing_systec_v2_create_array(message string) []string {
   }
 
   if DEBUG.enable {
-  c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 create array: %#v", mod_name, values)
+	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 create array: %#v", mod_name, values)
   }
   return values
 }
@@ -305,17 +305,23 @@ func (c *Config) Processing_systec_v2_create_array(message string) []string {
 func (c *Config) get_datetime(timestamp string) string {
   var dt time.Time
   var err error
-  for _, time_format := range TimeFormatArray {
-    dt, err = time.Parse(time_format, timestamp)
-	if err != nil {
-		c.ch_message <- fmt.Sprintf("w|:|%s: time format: %s", mod_name, err.Error())
-	} else {
-		return dt.Format(TimeFormat)
+  if !c.Local_timestamp {
+	for _, time_format := range TimeFormatArray {
+		dt, err = time.Parse(time_format, timestamp)
+		if err != nil {
+			c.ch_message <- fmt.Sprintf("w|:|%s: time format: %s", mod_name, err.Error())
+		} else {
+			return dt.Format(TimeFormat)
+		}
 	}
   }
-  if err != nil {
-	c.ch_message <- fmt.Sprintf("w|:|%s: time format: system time is applied", mod_name)
-    return time.Now().Format(TimeFormat)
+  if ( err != nil && !c.Local_timestamp ) || c.Local_timestamp {
+	c.ch_message <- fmt.Sprintf("w|:|%s: time format: local timestamp is applied", mod_name)
+	local_timestamp := time.Now().Format(TimeFormat)
+	if DEBUG.enable {
+		c.ch_message <- fmt.Sprintf("d|:|%s: timestamp remote: '%s'  local: %#v", mod_name, timestamp, local_timestamp)
+	}
+    return local_timestamp
   }
   return dt.Format(TimeFormat)
 }
