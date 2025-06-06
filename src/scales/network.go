@@ -63,8 +63,9 @@ func (c *Config) Network_receive() error {
 	return err
   }
   t2 := time.Now()
+  message := string(buf[:n])
   if DEBUG.enable {
-    c.ch_message <- fmt.Sprintf("d|:|%s: host: %s  time: %s  receive raw count: %d  data: %s", mod_name, c.network_connection_string, t2.Sub(t1), n, string(buf))
+    c.ch_message <- fmt.Sprintf("d|:|%s: host: %s  time: %s  receive raw count: %d  data: %s", mod_name, c.network_connection_string, t2.Sub(t1), n, message)
   }
 
   if n == 0 {
@@ -74,7 +75,7 @@ func (c *Config) Network_receive() error {
   c.Type = strings.ToLower(c.Type)
 
   if c.Type == "systec" || regexp.MustCompile(`(?is)^b[uy].*at`).MatchString(c.Type) {
-    c.Processing_systec(string(buf))
+    c.Processing_systec(message)
   }
 
   return nil
