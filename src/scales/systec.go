@@ -36,6 +36,8 @@ func (c *Config) Processing_systec_v1(message string) {
 
   values := strings.Split(msg, ";")
 
+  if len(values) == 0 { return }
+
   for i, v := range values {
     values[i] = strings.TrimSpace(v)
   }
@@ -48,22 +50,22 @@ func (c *Config) Processing_systec_v1(message string) {
 
   kaw.Id_scales = fmt.Sprintf("%d", c.Id_scale)
   kaw.Timestamp = c.get_datetime(values[0])
-  if ! c.check_disabled_parameter(`weight`) {
+  if ! c.check_disabled_parameter(`weight`) && len(values) >= 2 {
     kaw.Weight = values[1]
   }
-  if ! c.check_disabled_parameter(`weight_platform_1`) {
+  if ! c.check_disabled_parameter(`weight_platform_1`) && len(values) >= 6 {
     kaw.Weight_platform_1 = values[5]
   }
-  if ! c.check_disabled_parameter(`weight_platform_2`) {
+  if ! c.check_disabled_parameter(`weight_platform_2`) && len(values) >= 10 {
     kaw.Weight_platform_2 = values[9]
   }
-  if ! c.check_disabled_parameter(`weight_stabilized_1`) {
+  if ! c.check_disabled_parameter(`weight_stabilized_1`) && len(values) >= 5 {
     kaw.Weight_stabilized_1 = values[4]
   }
-  if ! c.check_disabled_parameter(`weight_stabilized_2`) {
+  if ! c.check_disabled_parameter(`weight_stabilized_2`) && len(values) >= 5 {
     kaw.Weight_stabilized_2 = values[4]
   }
-  if len(values) >= 29 {
+  if len(values) >= 30 {
 	  if ! c.check_disabled_parameter(`w1`) {
 		kaw.W1 = values[14]
 	  }
@@ -121,7 +123,7 @@ func (c *Config) Processing_systec_v2(message string) {
             c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message W1: %#v", mod_name, msg)
           }
           values := c.Processing_systec_v2_create_array(msg)
-          if len(values) > 7 {
+          if len(values) > 8 {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: W1  values: %#v", mod_name, values)
             }
@@ -143,7 +145,7 @@ func (c *Config) Processing_systec_v2(message string) {
             c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message P1: %#v", mod_name, msg)
           }
           values := c.Processing_systec_v2_create_array(msg)
-          if len(values) > 6 {
+          if len(values) > 4 {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: P1  values: %#v", mod_name, values)
             }
@@ -160,7 +162,7 @@ func (c *Config) Processing_systec_v2(message string) {
             c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message P2: %#v", mod_name, msg)
           }
           values := c.Processing_systec_v2_create_array(msg)
-          if len(values) > 6 {
+          if len(values) > 4 {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: P2  values: %#v", mod_name, values)
             }
@@ -177,7 +179,7 @@ func (c *Config) Processing_systec_v2(message string) {
             c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message P3: %#v", mod_name, msg)
           }
           values := c.Processing_systec_v2_create_array(msg)
-          if len(values) > 6 {
+          if len(values) > 4 {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: P3  values: %#v", mod_name, values)
             }
@@ -194,7 +196,7 @@ func (c *Config) Processing_systec_v2(message string) {
             c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message S1: %#v", mod_name, msg)
           }
           values := c.Processing_systec_v2_create_array(msg)
-          if len(values) > 5 {
+          if len(values) > 4 {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: S1  values: %#v", mod_name, values)
             }
@@ -208,7 +210,7 @@ func (c *Config) Processing_systec_v2(message string) {
             c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message S2: %#v", mod_name, msg)
           }
           values := c.Processing_systec_v2_create_array(msg)
-          if len(values) > 5 {
+          if len(values) > 4 {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: S2  values: %#v", mod_name, values)
             }
@@ -222,7 +224,7 @@ func (c *Config) Processing_systec_v2(message string) {
             c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message S3: %#v", mod_name, msg)
           }
           values := c.Processing_systec_v2_create_array(msg)
-          if len(values) > 5 {
+          if len(values) > 4 {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: S3  values: %#v", mod_name, values)
             }
@@ -236,7 +238,7 @@ func (c *Config) Processing_systec_v2(message string) {
             c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message S4: %#v", mod_name, msg)
           }
           values := c.Processing_systec_v2_create_array(msg)
-          if len(values) > 5 {
+          if len(values) > 4 {
             if DEBUG.enable {
               c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message type: S4  values: %#v", mod_name, values)
             }
