@@ -1,8 +1,9 @@
 .vscode
 *.exe
-reading_scales
+reading_from_scales
 data/*
 deploy/*
 /*.yml
 *.sdb*
 *.log
+config.d/*

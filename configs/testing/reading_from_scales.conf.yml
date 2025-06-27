@@ -8,102 +8,22 @@ database:
             database: "KRR-PA-UNIFIED_WEIGHT_SYSTEM" # Database name
             table: "KEP_Analytics_Weight"
 
-scales:
-        -
-            enable: true
-            connection: network
-            type: bullat
-            protocol: V2
-            id_scale: 1470
-            command: <SD>
-            coefficient: 1
-            disabled_parameters:
-            local_timestamp: true
-            read_cycle: 1000
-            network:
-                host: 10.27.226.67
-                port: 25687
-                protocol: tcp
-
-        -
-            enable: true
-            connection: network
-            type: bullat
-            protocol: V2
-            id_scale: 491
-            command: <SD>
-            coefficient: 1
-            disabled_parameters: '^w\d$'
-            local_timestamp: true
-            read_cycle: 1000
-            network:
-                host: 10.27.233.115
-                port: 25687
-                protocol: tcp
-
-        -
-            enable: true
-            connection: network
-            type: bullat
-            protocol: V2
-            id_scale: 1202
-            command: <SD>
-            coefficient: 1
-            disabled_parameters:
-            local_timestamp: true
-            read_cycle: 1000
-            network:
-                host: 10.27.230.7
-                port: 25687
-                protocol: tcp
-
-        -
-            enable: true
-            connection: network
-            type: bullat
-            protocol:
-            id_scale: 791
-            command:
-            coefficient: 1
-            disabled_parameters:
-            local_timestamp: true
-            read_cycle: 1000
-            network:
-                host: 10.21.119.108
-                port: 1234
-                protocol: tcp
-
-        -
-            enable: true
-            connection: network
-            type: bullat
-            protocol:
-            id_scale: 792
-            command:
-            coefficient: 1
-            disabled_parameters:
-            local_timestamp: true
-            read_cycle: 1000
-            network:
-                host: 10.21.119.106
-                port: 1234
-                protocol: tcp
-
-        -
-            enable: true
-            connection: network
-            type: bullat
-            protocol:
-            id_scale: 793
-            command:
-            coefficient: 1
-            disabled_parameters:
-            local_timestamp: true
-            read_cycle: 1000
-            network:
-                host: 10.21.119.107
-                port: 1234
-                protocol: tcp
+#scales:
+#        -
+#            enable: true
+#            connection: network
+#            type: bullat
+#            protocol: V2
+#            id_scale: 1470
+#            command: <SD>
+#            coefficient: 1
+#            disabled_parameters:
+#            local_timestamp: true
+#            read_cycle: 1000
+#            network:
+#                host: 10.27.226.67
+#                port: 25687
+#                protocol: tcp
 
 
 app:

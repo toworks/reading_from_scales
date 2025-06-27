@@ -27,9 +27,12 @@ compile:
 	GOARCH=amd64 GOOS=windows go build -ldflags "-s -w" -o ${BUILD_NAME}.exe .
 	GOARCH=386   GOOS=windows go build -ldflags "-s -w" -o ${BUILD_NAME}.exe .
 
-install: ${DEPLOY_FILES}
-	mkdir -p ${DEST_DIR}
+install: ${DEPLOY_FILES} config.d
 	for f in ${DEPLOY_FILES}; do echo $$f;  cp -f $$f ${DEST_DIR}; done
+
+config.d:
+	mkdir -p ${DEST_DIR}
+	[ ! -d "configs/${RELEASE_TYPE}/$@" ] || cp -fa configs/${RELEASE_TYPE}/$@ ${DEST_DIR}
 
 clean:
 	go clean
