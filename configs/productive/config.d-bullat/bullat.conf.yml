@@ -1,6 +1,6 @@
 scales:
         -
-            enable: true
+            enable: false
             connection: network
             type: bullat
             protocol: V2
@@ -16,7 +16,7 @@ scales:
                 protocol: tcp
 
         -
-            enable: true
+            enable: false
             connection: network
             type: bullat
             protocol: V2
@@ -32,7 +32,7 @@ scales:
                 protocol: tcp
 
         -
-            enable: true
+            enable: false
             connection: network
             type: bullat
             protocol: V2
@@ -64,7 +64,7 @@ scales:
                 protocol: tcp
 
         -
-            enable: true
+            enable: false
             connection: network
             type: bullat
             protocol:
@@ -80,7 +80,7 @@ scales:
                 protocol: tcp
 
         -
-            enable: true
+            enable: false
             connection: network
             type: bullat
             protocol:
