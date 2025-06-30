@@ -24,7 +24,7 @@ func (c *Config) Network_connect() error {
   }
   t2 := time.Now()
 
-  c.ch_message <- fmt.Sprintf("i|:|%s: connect: %s  time: %s", mod_name, c.network_connection_string, t2.Sub(t1))
+  c.ch_message <- fmt.Sprintf("i|:|%s: scale id: $d  connect: %s  time: %s", mod_name, c.Id_scale, c.network_connection_string, t2.Sub(t1))
   return nil
 }
 /*
