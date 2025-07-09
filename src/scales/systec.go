@@ -44,7 +44,7 @@ func (c *Config) Processing_systec_v1(message string) {
 
   kaw := db.Kep_analytics_weight{}
   if DEBUG.enable {
-	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec message: count: %v", mod_name, len(values))
+    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec message: count: %v", mod_name, len(values))
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec message: %#v", mod_name, kaw)
   }
 
@@ -66,18 +66,18 @@ func (c *Config) Processing_systec_v1(message string) {
     kaw.Weight_stabilized_2 = values[4]
   }
   if len(values) >= 30 {
-	  if ! c.check_disabled_parameter(`w1`) {
-		kaw.W1 = values[14]
-	  }
-	  if ! c.check_disabled_parameter(`w2`) {
-		kaw.W2 = values[19]
-	  }
-	  if ! c.check_disabled_parameter(`w3`) {
-		kaw.W3 = values[24]
-	  }
-	  if ! c.check_disabled_parameter(`w4`) {
-		kaw.W4 = values[29]
-	  }
+      if ! c.check_disabled_parameter(`w1`) {
+        kaw.W1 = values[14]
+      }
+      if ! c.check_disabled_parameter(`w2`) {
+        kaw.W2 = values[19]
+      }
+      if ! c.check_disabled_parameter(`w3`) {
+        kaw.W3 = values[24]
+      }
+      if ! c.check_disabled_parameter(`w4`) {
+        kaw.W4 = values[29]
+      }
   }
 
   if DEBUG.enable {
@@ -98,8 +98,8 @@ func (c *Config) Processing_systec_v1(message string) {
   }
 
   select {
-	case c.ch_db_message <- kaw:
-	default:
+    case c.ch_db_message <- kaw:
+    default:
   }
 }
 
@@ -107,10 +107,10 @@ func (c *Config) Processing_systec_v2(message string) {
   messages := regexp.MustCompile(`\w\d\[.*?\]`).FindAllString(message, -1)
 
   kaw := db.Kep_analytics_weight{}
-  c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message: %#v", mod_name, kaw)
 
   if DEBUG.enable {
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 messages count: %d  array: %#v", mod_name, len(messages), messages)
+    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 message: %#v", mod_name, kaw)
   }
 
   if len(messages) == 7 {
@@ -267,8 +267,8 @@ func (c *Config) Processing_systec_v2(message string) {
   }
 
   select {
-	case c.ch_db_message <- kaw:
-	default:
+    case c.ch_db_message <- kaw:
+    default:
   }
 }
 
@@ -297,7 +297,7 @@ func (c *Config) Processing_systec_v2_create_array(message string) []string {
   }
 
   if DEBUG.enable {
-	c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 create array: %#v", mod_name, values)
+    c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 create array: %#v", mod_name, values)
   }
   return values
 }
@@ -306,20 +306,20 @@ func (c *Config) get_datetime(timestamp string) string {
   var dt time.Time
   var err error
   if !c.Local_timestamp {
-	for _, time_format := range TimeFormatArray {
-		dt, err = time.Parse(time_format, timestamp)
-		if err != nil {
-			c.ch_message <- fmt.Sprintf("w|:|%s: time format: %s", mod_name, err.Error())
-		} else {
-			return dt.Format(TimeFormat)
-		}
-	}
+    for _, time_format := range TimeFormatArray {
+        dt, err = time.Parse(time_format, timestamp)
+        if err != nil {
+            c.ch_message <- fmt.Sprintf("w|:|%s: time format: %s", mod_name, err.Error())
+        } else {
+            return dt.Format(TimeFormat)
+        }
+    }
   }
   if ( err != nil && !c.Local_timestamp ) || c.Local_timestamp {
-	local_timestamp := time.Now().Format(TimeFormat)
-	if DEBUG.enable {
-		c.ch_message <- fmt.Sprintf("d|:|%s: timestamp remote: '%s'  local: %#v", mod_name, timestamp, local_timestamp)
-	}
+    local_timestamp := time.Now().Format(TimeFormat)
+    if DEBUG.enable {
+        c.ch_message <- fmt.Sprintf("d|:|%s: timestamp remote: '%s'  local: %#v", mod_name, timestamp, local_timestamp)
+    }
     return local_timestamp
   }
   return dt.Format(TimeFormat)
