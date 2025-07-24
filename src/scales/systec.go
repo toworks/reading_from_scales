@@ -1,6 +1,8 @@
 /*
 
-  известны под именем БУЛАТ
+    протокол: 
+    информация: известны под именем БУЛАТ
+    контроллер: 
 
 */
 
@@ -10,17 +12,9 @@ import (
   "fmt"
   "regexp"
   "strings"
-  "time"
 
   db "reading_from_scales/src/database"
 )
-
-var TimeFormatArray = []string {"2006-01-02 15:04:05.000",
-                                "06-01-02 15:04:05",
-                                "02.01.06 15:04:05",
-                                "01.02.06 15:04:05",
-                                "02.01.06 15:04",
-                                "01.02.06 15:04"}
 
 
 func (c *Config) Processing_systec(message string) {
@@ -272,21 +266,6 @@ func (c *Config) Processing_systec_v2(message string) {
   }
 }
 
-func (c *Config) check_disabled_parameter(match string) bool {
-  var pattern string
-
-  if c.Disabled_parameters != "" {
-    pattern = "(?is)"+c.Disabled_parameters
-  } else {
-    pattern = "(?is)^!" + match + "$"
-  }
-  res := regexp.MustCompile(pattern).MatchString(match)
-  if DEBUG.enable {
-    c.ch_message <- fmt.Sprintf("d|:|%s: disabled parameters patern: %s  match: %s  status: %v", mod_name, pattern, match, res)
-  }
-  return res
-}
-
 func (c *Config) Processing_systec_v2_create_array(message string) []string {
   msg := regexp.MustCompile("^\\w\\d\\[(.*);\\]$").ReplaceAllString(message, "$1")
 
@@ -300,27 +279,4 @@ func (c *Config) Processing_systec_v2_create_array(message string) []string {
     c.ch_message <- fmt.Sprintf("d|:|%s: Processing Systec V2 create array: %#v", mod_name, values)
   }
   return values
-}
-
-func (c *Config) get_datetime(timestamp string) string {
-  var dt time.Time
-  var err error
-  if !c.Local_timestamp {
-    for _, time_format := range TimeFormatArray {
-        dt, err = time.Parse(time_format, timestamp)
-        if err != nil {
-            c.ch_message <- fmt.Sprintf("w|:|%s: time format: %s", mod_name, err.Error())
-        } else {
-            return dt.Format(TimeFormat)
-        }
-    }
-  }
-  if ( err != nil && !c.Local_timestamp ) || c.Local_timestamp {
-    local_timestamp := time.Now().Format(TimeFormat)
-    if DEBUG.enable {
-        c.ch_message <- fmt.Sprintf("d|:|%s: timestamp remote: '%s'  local: %#v", mod_name, timestamp, local_timestamp)
-    }
-    return local_timestamp
-  }
-  return dt.Format(TimeFormat)
 }
