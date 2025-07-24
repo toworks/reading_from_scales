@@ -37,8 +37,10 @@ func (c *Config) Network_send() error {
 
   c._connect.SetWriteDeadline(time.Now().Add(time.Millisecond * read_write_timeout))
 
+  message := c.Create_message()
+
   t1 := time.Now()
-  _, err = c._connect.Write([]byte(c.Command))
+  _, err = c._connect.Write(message)
   if err != nil {
         c.ch_message <- fmt.Sprintf("e|:|%s: send failed: %s  error: %s", mod_name, c.network_connection_string, err.Error())
         return err
@@ -69,14 +71,34 @@ func (c *Config) Network_receive() error {
   }
 
   if n == 0 {
-	return nil
+    return nil
   }
 
   c.Type = strings.ToLower(c.Type)
 
   if c.Type == "systec" || regexp.MustCompile(`(?is)^b[uy].*at`).MatchString(c.Type) {
     c.Processing_systec(message)
+  } else if regexp.MustCompile(`(?is)^schenck`).MatchString(c.Type) {
+    c.Processing_schenck(message)
   }
 
   return nil
+}
+
+func (c *Config) Create_message() []byte {
+  var message string
+
+  if c.Type == "systec" || regexp.MustCompile(`(?is)^b[uy].*at`).MatchString(c.Type) {
+    message = c.Command
+  } else if regexp.MustCompile(`(?is)^schenck`).MatchString(c.Type) {
+    request := fmt.Sprintf("%s%s%s", c.Command, string(DLE), string(ETX))
+    bcc, _ := c.hash_bcc([]byte(request))
+    message = fmt.Sprintf("%s%s%s", string(STX), request, bcc)
+  }
+
+  if DEBUG.enable {
+    c.ch_message <- fmt.Sprintf("d|:|%s: create message: '%v'", mod_name, message)
+  }
+
+  return []byte(message)
 }
