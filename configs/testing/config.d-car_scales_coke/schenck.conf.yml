@@ -1,0 +1,17 @@
+scales:
+        -
+            enable: true
+            connection: network
+            type: schenck
+            protocol:
+            id_scale: 450
+            command: '00#TG#'
+            parameter_position: 1
+            coefficient: 1000
+            disabled_parameters:
+            local_timestamp: true
+            read_cycle: 1000
+            network:
+                host: 10.27.232.50
+                port: 4001
+                protocol: udp
