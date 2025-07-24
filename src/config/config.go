@@ -56,7 +56,8 @@ type Scale struct {
 	Protocol                   string `yaml:"protocol"`
 	Id_scale                   int    `yaml:"id_scale"`
 	Command                    string `yaml:"command"`
-	Coefficient                int    `yaml:"coefficient"`
+	Parameter_position         int    `yaml:"parameter_position"`
+	Coefficient                float64`yaml:"coefficient"`
 	Disabled_parameters        string `yaml:"disabled_parameters"`
 	Local_timestamp            bool   `yaml:"local_timestamp"`
 	Read_cycle                 int    `yaml:"read_cycle"`
