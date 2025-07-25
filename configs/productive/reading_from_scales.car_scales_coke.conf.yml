@@ -32,6 +32,6 @@ app:
         # info, warn, error, debug, fatal, trace
         level: info
     service:
-        name: reading_from_scales.bullat
-        display_name: reading_from_scales.bullat
+        name: reading_from_scales.car_scales_coke
+        display_name: reading_from_scales.car_scales_coke
         description: reading data from weighing devices and logging in sql - reading from scales
