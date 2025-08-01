@@ -80,6 +80,8 @@ func (c *Config) Network_receive() error {
     c.Processing_systec(message)
   } else if regexp.MustCompile(`(?is)^schenck`).MatchString(c.Type) {
     c.Processing_schenck(message)
+  } else if regexp.MustCompile(`(?is)^wp8902`).MatchString(c.Type) {
+    c.Processing_wp8902(message)
   }
 
   return nil
@@ -94,6 +96,8 @@ func (c *Config) Create_message() []byte {
     request := fmt.Sprintf("%s%s%s", c.Command, string(DLE), string(ETX))
     bcc, _ := c.hash_bcc([]byte(request))
     message = fmt.Sprintf("%s%s%s", string(STX), request, bcc)
+  } else if regexp.MustCompile(`(?is)^wp8902`).MatchString(c.Type) {
+    message = c.Command
   }
 
   if DEBUG.enable {
