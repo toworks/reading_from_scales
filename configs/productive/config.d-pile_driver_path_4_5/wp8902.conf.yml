@@ -1,0 +1,33 @@
+scales:
+        -
+            enable: true
+            connection: network
+            type: wp8902
+            protocol:
+            id_scale: 1272
+            command: 'w'
+            parameter_position:
+            coefficient: 1
+            disabled_parameters:
+            local_timestamp: true
+            read_cycle: 1000
+            network:
+                host: 10.27.233.136
+                port: 950
+                protocol: tcp
+        -
+            enable: true
+            connection: network
+            type: wp8902
+            protocol:
+            id_scale: 1273
+            command: 'w'
+            parameter_position:
+            coefficient: 1
+            disabled_parameters:
+            local_timestamp: true
+            read_cycle: 1000
+            network:
+                host: 10.27.233.137
+                port: 950
+                protocol: tcp
