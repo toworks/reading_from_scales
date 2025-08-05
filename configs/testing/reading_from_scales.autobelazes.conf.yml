@@ -1,0 +1,37 @@
+database:
+            enable: true
+            type: mssql # Database type (can be: postgres, mysql, sqlite)
+            host: "krr-sql-paclx03"  # Database host address
+            port: 1433 # Port to connect to the database
+            username: '%MSSQL_USER%' #MUST ADD A DOMAIN! Username to connect to the database
+            password: "%MSSQL_PASSWORD%" # Password to connect to the database
+            database: "KRR-PA-UNIFIED_WEIGHT_SYSTEM" # Database name
+            table: "KEP_Analytics_Weight"
+
+#scales:
+#        -
+#            enable: true
+#            connection: network
+#            type: bullat
+#            protocol: V2
+#            id_scale: 1470
+#            command: <SD>
+#            coefficient: 1
+#            disabled_parameters:
+#            local_timestamp: true
+#            read_cycle: 1000
+#            network:
+#                host: 10.27.226.67
+#                port: 25687
+#                protocol: tcp
+
+
+app:
+    log:
+        enable: false
+        # info, warn, error, debug, fatal, trace
+        level: info
+    service:
+        name: reading_from_scales.autobelazes
+        display_name: reading_from_scales.autobelazes
+        description: reading data from weighing devices and logging in sql - reading from scales
