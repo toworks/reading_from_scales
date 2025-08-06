@@ -47,7 +47,7 @@ func (c *Config) Network_send() error {
   }
   t2 := time.Now()
   if DEBUG.enable {
-        c.ch_message <- fmt.Sprintf("d|:|%s: host: %s  time: %s  send command: %s", mod_name, c.network_connection_string, t2.Sub(t1), c.Command)
+        c.ch_message <- fmt.Sprintf("d|:|%s: host: %s  time: %s  send command: %s", mod_name, c.network_connection_string, t2.Sub(t1), message)
   }
 
   return nil
@@ -97,7 +97,7 @@ func (c *Config) Create_message() []byte {
     bcc, _ := c.hash_bcc([]byte(request))
     message = fmt.Sprintf("%s%s%s", string(STX), request, bcc)
   } else if regexp.MustCompile(`(?is)^wp8902`).MatchString(c.Type) {
-    message = c.Command
+    message = c.Command + "\r\n"
   }
 
   if DEBUG.enable {
