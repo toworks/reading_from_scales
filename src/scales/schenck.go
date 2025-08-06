@@ -26,10 +26,6 @@ func (c *Config) Processing_schenck(message string) {
 
   if len(values) == 0 { return }
 
-  if c.Coefficient == 0 {
-    c.Coefficient = 1
-  }
-
   if index > len(values) {
     c.ch_message <- fmt.Sprintf("w|:|%s: Processing Schenck: parameter position: %d  is greater than parameters: %d", mod_name, index, len(values))
     return
