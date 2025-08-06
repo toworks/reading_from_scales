@@ -5,7 +5,7 @@ scales:
             type: wp8902
             protocol:
             id_scale: 1272
-            command: 'w'
+            command: 'W'
             parameter_position:
             coefficient: 1
             disabled_parameters:
@@ -21,7 +21,7 @@ scales:
             type: wp8902
             protocol:
             id_scale: 1273
-            command: 'w'
+            command: 'W'
             parameter_position:
             coefficient: 1
             disabled_parameters:

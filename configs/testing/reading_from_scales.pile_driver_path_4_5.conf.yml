@@ -28,9 +28,9 @@ database:
 
 app:
     log:
-        enable: false
+        enable: true
         # info, warn, error, debug, fatal, trace
-        level: info
+        level: debug
     service:
         name: reading_from_scales.pile_driver_path_4_5
         display_name: reading_from_scales.pile_driver_path_4_5
