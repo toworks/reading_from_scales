@@ -80,25 +80,29 @@ func (c *Config) Network_receive() error {
     c.Processing_systec(message)
   } else if regexp.MustCompile(`(?is)^schenck`).MatchString(c.Type) {
     c.Processing_schenck(message)
-  }
+ 	} else if regexp.MustCompile(`(?is)^we2110`).MatchString(c.Type) {
+		c.Processing_autobelazes(message)
+	}
 
-  return nil
+	return nil
 }
 
 func (c *Config) Create_message() []byte {
-  var message string
+	var message string
 
-  if c.Type == "systec" || regexp.MustCompile(`(?is)^b[uy].*at`).MatchString(c.Type) {
-    message = c.Command
-  } else if regexp.MustCompile(`(?is)^schenck`).MatchString(c.Type) {
-    request := fmt.Sprintf("%s%s%s", c.Command, string(DLE), string(ETX))
-    bcc, _ := c.hash_bcc([]byte(request))
-    message = fmt.Sprintf("%s%s%s", string(STX), request, bcc)
-  }
+	if c.Type == "systec" || regexp.MustCompile(`(?is)^b[uy].*at`).MatchString(c.Type) {
+		message = c.Command
+	} else if regexp.MustCompile(`(?is)^schenck`).MatchString(c.Type) {
+		request := fmt.Sprintf("%s%s%s", c.Command, string(DLE), string(ETX))
+		bcc, _ := c.hash_bcc([]byte(request))
+		message = fmt.Sprintf("%s%s%s", string(STX), request, bcc)
+	} else if regexp.MustCompile(`(?is)^we2110`).MatchString(c.Type) {
+		message = c.Command
+	}
 
-  if DEBUG.enable {
-    c.ch_message <- fmt.Sprintf("d|:|%s: create message: '%v'", mod_name, message)
-  }
+	if DEBUG.enable {
+		c.ch_message <- fmt.Sprintf("d|:|%s: create message: '%v'", mod_name, message)
+	}
 
-  return []byte(message)
+	return []byte(message)
 }

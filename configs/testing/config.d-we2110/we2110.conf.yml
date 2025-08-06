@@ -1,0 +1,34 @@
+scales:
+        -
+            enable: true
+            connection: network
+            type: autobelazes
+            protocol:
+            id_scale: 804
+            command: 'S01;MSV?;'
+            parameter_position: 
+            coefficient: 1000
+            disabled_parameters:
+            local_timestamp: true
+            read_cycle: 1000
+            network:
+                host: 10.27.233.135
+                port: 4001
+                protocol: tcp
+
+        -
+            enable: true
+            connection: network
+            type: marten
+            protocol:
+            id_scale: 803
+            command: 
+            parameter_position: 
+            coefficient: 1000
+            disabled_parameters:
+            local_timestamp: true
+            read_cycle: 1000
+            network:
+                host: 10.27.230.182
+                port: 4001
+                protocol: tcp
