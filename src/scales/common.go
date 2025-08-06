@@ -158,7 +158,10 @@ func (c *Config) get_datetime(timestamp string) string {
 
 func (c *Config) get_value(value string) string {
   if f, err := strconv.ParseFloat(value, 64); err == nil {
-     value = fmt.Sprintf("%d", int(f * c.Coefficient))
+    if c.Coefficient == 0 {
+        c.Coefficient = 1
+    }
+    value = fmt.Sprintf("%d", int(f * c.Coefficient))
   }
   return value
 }
