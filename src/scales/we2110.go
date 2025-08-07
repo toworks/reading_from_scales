@@ -39,7 +39,6 @@ func (c *Config) Processing_autobelazes(message string) error {
 	weight := int(math.Round(weightFloat * c.Coefficient))
 
 	if c.Type == "marten" {
-		c.ch_message <- fmt.Sprintf("d|:|%s: vvvvvvv'", mod_name)
 		if len(weightStr) > 0 && weightStr[len(weightStr)-1] == 'G' {
 			kaw.Weight_stabilized_1 = "1"
 			weightStr = strings.TrimSuffix(weightStr, "G")
